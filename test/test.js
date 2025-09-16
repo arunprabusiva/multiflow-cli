@@ -1,0 +1,33 @@
+#!/usr/bin/env node
+
+// Simple test to verify MultiFlow CLI works
+const { execSync } = require('child_process');
+const path = require('path');
+
+console.log('🧪 Running MultiFlow CLI tests...');
+
+try {
+  // Test CLI is accessible
+  const cliPath = path.join(__dirname, '..', 'src', 'cli.js');
+  const helpOutput = execSync(`node "${cliPath}" --help`, { encoding: 'utf8' });
+  
+  if (helpOutput.includes('Multi-repo workflow orchestration CLI')) {
+    console.log('✅ CLI help command works');
+  } else {
+    throw new Error('CLI help output incorrect');
+  }
+
+  // Test version command
+  const versionOutput = execSync(`node "${cliPath}" --version`, { encoding: 'utf8' });
+  if (versionOutput.includes('1.0.0')) {
+    console.log('✅ CLI version command works');
+  } else {
+    throw new Error('CLI version output incorrect');
+  }
+
+  console.log('🎉 All tests passed!');
+  process.exit(0);
+} catch (error) {
+  console.error('❌ Test failed:', error.message);
+  process.exit(1);
+}

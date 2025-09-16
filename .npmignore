@@ -1,0 +1,17 @@
+# Test files and scripts
+test-multiflow.sh
+test-multiflow.bat
+USER_GUIDE.md
+CONTRIBUTING.md
+
+# Development files
+.flow.yml
+*.log
+.DS_Store
+
+# Git files
+.git/
+.gitignore
+
+# Node modules (already excluded by default)
+node_modules/

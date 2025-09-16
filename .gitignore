@@ -1,0 +1,19 @@
+node_modules/
+.flow.yml
+*.log
+.DS_Store
+.env
+
+# Development files
+SOCIAL.md
+PUBLISH.md
+test-multiflow.sh
+test-multiflow.bat
+test-npm-install.sh
+
+# Test directories
+multiflow-test*/
+test-workspace/
+
+# Package files
+*.tgz

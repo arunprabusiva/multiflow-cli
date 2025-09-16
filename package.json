@@ -1,0 +1,63 @@
+{
+  "name": "multiflow-cli",
+  "version": "1.0.0",
+  "description": "Multi-repo workflow orchestration CLI - streamline feature development across multiple repositories",
+  "main": "src/cli.js",
+  "bin": {
+    "flow": "./src/cli.js"
+  },
+  "homepage": "https://github.com/arunprabusiva/multiflow-cli",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arunprabusiva/multiflow-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/arunprabusiva/multiflow-cli/issues"
+  },
+  "scripts": {
+    "start": "node src/cli.js",
+    "test": "node test/test.js",
+    "prepublishOnly": "npm test",
+    "postinstall": "echo \"\\n🌊 MultiFlow installed successfully!\\n✅ Use 'flow --help' to get started\\n\""
+  },
+  "dependencies": {
+    "commander": "^11.0.0",
+    "simple-git": "^3.19.1",
+    "yaml": "^2.3.2",
+    "inquirer": "^9.2.10",
+    "chalk": "^4.1.2",
+    "open": "^9.1.0",
+    "@octokit/rest": "^20.0.2"
+  },
+  "keywords": [
+    "git",
+    "multi-repo",
+    "cli",
+    "orchestration",
+    "workflow",
+    "feature-branch",
+    "github",
+    "development",
+    "automation",
+    "monorepo"
+  ],
+  "author": {
+    "name": "Arunprabu Sivapprakasam",
+    "url": "https://github.com/arunprabusiva"
+  },
+  "contributors": [
+    {
+      "name": "Arunprabu Sivapprakasam",
+      "url": "https://github.com/arunprabusiva"
+    }
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ]
+}
