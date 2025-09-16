@@ -69,6 +69,12 @@ class RepoOrch {
     await this.saveConfig();
     console.log(chalk.green(`\n✅ Workspace initialized with ${repos.length} repositories`));
     
+    // Show ignored repos if any
+    const ignoredRepos = await this.loadIgnoredRepos();
+    if (ignoredRepos.length > 0) {
+      console.log(chalk.gray(`   Ignored: ${ignoredRepos.join(', ')} (via .multiflowignore)`));
+    }
+    
     // Show configuration summary
     this.showInitSummary();
   }
@@ -267,9 +273,10 @@ class RepoOrch {
   async scanRepos() {
     const repos = [];
     const items = await fs.readdir('.', { withFileTypes: true });
+    const ignoredRepos = await this.loadIgnoredRepos();
     
     for (const item of items) {
-      if (item.isDirectory() && !item.name.startsWith('.')) {
+      if (item.isDirectory() && !item.name.startsWith('.') && !ignoredRepos.includes(item.name)) {
         const repoPath = item.name;
         const gitPath = path.join(repoPath, '.git');
         
@@ -292,6 +299,18 @@ class RepoOrch {
     }
     
     return repos;
+  }
+
+  async loadIgnoredRepos() {
+    try {
+      const content = await fs.readFile('.multiflowignore', 'utf8');
+      return content
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line && !line.startsWith('#'));
+    } catch (error) {
+      return [];
+    }
   }
 
   async detectDefaultBranch(git) {
@@ -324,34 +343,103 @@ class RepoOrch {
     }
   }
 
-  async createFeature(featureName) {
+  async createFeature(featureName, options = {}) {
     await this.loadConfig();
     const branchName = `feature/${featureName}`;
+    const targetRepos = this.getTargetRepos(options.repos);
     
-    for (const [repoName, repoInfo] of Object.entries(this.config.repos)) {
+    // Check if branch already exists
+    const existingBranches = await this.checkBranchExists(branchName, targetRepos);
+    if (existingBranches.length > 0) {
+      throw new Error(`Branch '${branchName}' already exists in: ${existingBranches.join(', ')}`);
+    }
+    
+    if (options.dryRun) {
+      console.log(chalk.blue('🔍 Dry run - would create feature branch:'));
+      targetRepos.forEach(repoName => {
+        console.log(`  • ${repoName}: ${branchName}`);
+      });
+      return;
+    }
+    
+    const results = { success: [], failed: [] };
+    
+    for (const repoName of targetRepos) {
+      const repoInfo = this.config.repos[repoName];
       const git = simpleGit(repoInfo.path);
       
       try {
+        // Stash if requested and there are changes
+        if (options.stash) {
+          const status = await git.status();
+          if (!status.isClean()) {
+            await git.stash(['push', '-m', `MultiFlow auto-stash for ${featureName}`]);
+            console.log(`📦 ${repoName}: Stashed uncommitted changes`);
+          }
+        }
+        
         await git.checkoutLocalBranch(branchName);
         if (repoInfo.hasRemote) {
           await git.push('origin', branchName);
         }
         console.log(`✅ ${repoName}: Created branch ${branchName}`);
+        results.success.push(repoName);
       } catch (error) {
-        console.log(`⚠️  ${repoName}: ${error.message}`);
+        console.log(`❌ ${repoName}: ${error.message}`);
+        results.failed.push({ repo: repoName, error: error.message });
       }
+    }
+    
+    // Handle partial failures
+    if (results.failed.length > 0 && results.success.length > 0) {
+      console.log(chalk.yellow(`\n⚠️  Partial success: ${results.success.length}/${targetRepos.length} repositories`));
     }
     
     this.config.features[featureName] = {
       branch: branchName,
-      repos: Object.keys(this.config.repos),
+      repos: results.success,
       created: new Date().toISOString()
     };
     
     await this.saveConfig();
   }
 
-  async commitFeature(featureName, message) {
+  getTargetRepos(reposOption) {
+    if (reposOption) {
+      const specified = reposOption.split(',').map(r => r.trim());
+      const available = Object.keys(this.config.repos);
+      const invalid = specified.filter(r => !available.includes(r));
+      
+      if (invalid.length > 0) {
+        throw new Error(`Unknown repositories: ${invalid.join(', ')}. Available: ${available.join(', ')}`);
+      }
+      
+      return specified;
+    }
+    return Object.keys(this.config.repos);
+  }
+
+  async checkBranchExists(branchName, targetRepos) {
+    const existing = [];
+    
+    for (const repoName of targetRepos) {
+      const repoInfo = this.config.repos[repoName];
+      const git = simpleGit(repoInfo.path);
+      
+      try {
+        const branches = await git.branchLocal();
+        if (branches.all.includes(branchName)) {
+          existing.push(repoName);
+        }
+      } catch (error) {
+        // Ignore errors for branch checking
+      }
+    }
+    
+    return existing;
+  }
+
+  async commitFeature(featureName, message, options = {}) {
     await this.loadConfig();
     const feature = this.config.features[featureName];
     
@@ -359,7 +447,34 @@ class RepoOrch {
       throw new Error(`Feature '${featureName}' not found`);
     }
     
-    for (const repoName of feature.repos) {
+    const targetRepos = options.repos ? 
+      this.getTargetRepos(options.repos).filter(r => feature.repos.includes(r)) : 
+      feature.repos;
+    
+    if (options.dryRun) {
+      console.log(chalk.blue('🔍 Dry run - would commit changes in:'));
+      
+      for (const repoName of targetRepos) {
+        const repoInfo = this.config.repos[repoName];
+        const git = simpleGit(repoInfo.path);
+        
+        try {
+          await git.checkout(feature.branch);
+          const status = await git.status();
+          
+          if (status.files.length > 0) {
+            console.log(`  • ${repoName}: ${status.files.length} files to commit`);
+          } else {
+            console.log(`  • ${repoName}: No changes`);
+          }
+        } catch (error) {
+          console.log(`  • ${repoName}: Error - ${error.message}`);
+        }
+      }
+      return;
+    }
+    
+    for (const repoName of targetRepos) {
       const repoInfo = this.config.repos[repoName];
       const git = simpleGit(repoInfo.path);
       
@@ -375,7 +490,7 @@ class RepoOrch {
           console.log(`⚪ ${repoName}: No changes to commit`);
         }
       } catch (error) {
-        console.log(`⚠️  ${repoName}: ${error.message}`);
+        console.log(`❌ ${repoName}: ${error.message}`);
       }
     }
   }
@@ -407,7 +522,7 @@ class RepoOrch {
     }
   }
 
-  async cleanupFeature(featureName) {
+  async cleanupFeature(featureName, options = {}) {
     await this.loadConfig();
     const feature = this.config.features[featureName];
     
@@ -415,7 +530,19 @@ class RepoOrch {
       throw new Error(`Feature '${featureName}' not found`);
     }
     
-    for (const repoName of feature.repos) {
+    const targetRepos = options.repos ? 
+      this.getTargetRepos(options.repos).filter(r => feature.repos.includes(r)) : 
+      feature.repos;
+    
+    if (options.dryRun) {
+      console.log(chalk.blue('🔍 Dry run - would cleanup feature branch:'));
+      targetRepos.forEach(repoName => {
+        console.log(`  • ${repoName}: Delete ${feature.branch}`);
+      });
+      return;
+    }
+    
+    for (const repoName of targetRepos) {
       const repoInfo = this.config.repos[repoName];
       const git = simpleGit(repoInfo.path);
       
@@ -430,12 +557,15 @@ class RepoOrch {
         
         console.log(`✅ ${repoName}: Cleaned up ${feature.branch}`);
       } catch (error) {
-        console.log(`⚠️  ${repoName}: ${error.message}`);
+        console.log(`❌ ${repoName}: ${error.message}`);
       }
     }
     
-    delete this.config.features[featureName];
-    await this.saveConfig();
+    // Only delete feature if cleaning up all repos
+    if (!options.repos) {
+      delete this.config.features[featureName];
+      await this.saveConfig();
+    }
   }
 
   async mergeFeature(featureName) {
@@ -707,6 +837,40 @@ class RepoOrch {
     
     this.config.repos[repoName].defaultBranch = branchName;
     await this.saveConfig();
+  }
+
+  async ignoreRepository(repoName) {
+    const ignoredRepos = await this.loadIgnoredRepos();
+    
+    if (ignoredRepos.includes(repoName)) {
+      throw new Error(`Repository '${repoName}' is already ignored`);
+    }
+    
+    ignoredRepos.push(repoName);
+    await this.saveIgnoredRepos(ignoredRepos);
+  }
+
+  async unignoreRepository(repoName) {
+    const ignoredRepos = await this.loadIgnoredRepos();
+    
+    if (!ignoredRepos.includes(repoName)) {
+      throw new Error(`Repository '${repoName}' is not ignored`);
+    }
+    
+    const filtered = ignoredRepos.filter(repo => repo !== repoName);
+    await this.saveIgnoredRepos(filtered);
+  }
+
+  async saveIgnoredRepos(ignoredRepos) {
+    const content = [
+      '# MultiFlow ignore file',
+      '# Add repository names (one per line) to exclude from operations',
+      '# Lines starting with # are comments',
+      '',
+      ...ignoredRepos
+    ].join('\n');
+    
+    await fs.writeFile('.multiflowignore', content);
   }
 }
 

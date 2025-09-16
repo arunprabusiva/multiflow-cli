@@ -111,6 +111,25 @@ workspace:
   defaultPrivacy: public
 ```
 
+## Ignoring Repositories
+
+Create `.multiflowignore` to exclude repositories:
+
+```
+# MultiFlow ignore file
+# Add repository names (one per line) to exclude from operations
+
+docs
+scripts
+old-prototype
+```
+
+Or use commands:
+```bash
+flow config ignore docs        # Add to ignore list
+flow config unignore docs      # Remove from ignore list
+```
+
 ## Best Practices
 
 1. **Initialize once** per workspace

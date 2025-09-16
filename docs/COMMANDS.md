@@ -15,10 +15,18 @@ Manage features across repositories.
 
 ```bash
 flow feature create <name>              # Create feature branch everywhere
+flow feature create <name> --repos frontend,backend  # Target specific repos
+flow feature create <name> --dry-run    # Preview without executing
+flow feature create <name> --stash      # Auto-stash uncommitted changes
+
 flow feature commit <name> -m "msg"     # Commit changes across repos
+flow feature commit <name> -m "msg" --repos backend  # Commit specific repos
+flow feature commit <name> -m "msg" --dry-run        # Preview commits
+
 flow feature publish <name>             # Push branches to remotes
 flow feature merge <name>               # Check merge readiness
 flow feature cleanup <name>             # Delete feature branches
+flow feature cleanup <name> --repos frontend --dry-run  # Preview cleanup
 ```
 
 ### `flow status`
@@ -61,7 +69,8 @@ Manage workspace configuration.
 
 ```bash
 flow config show                              # Show current config
-flow config set-default-branch <repo> <branch> # Set default branch
+flow config ignore <repo>                    # Ignore repository
+flow config unignore <repo>                  # Stop ignoring repository
 ```
 
 ## GitHub Integration

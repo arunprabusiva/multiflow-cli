@@ -47,6 +47,14 @@ flow status payment-system
 | `flow status <name>` | Show feature status |
 | `flow feature cleanup <name>` | Remove feature branches |
 
+## Advanced Features
+
+- 🎯 **Selective Operations** - Target specific repositories
+- 🔍 **Dry Run Mode** - Preview changes before executing  
+- 📦 **Auto-Stash** - Handle uncommitted changes safely
+- 🛡️ **Smart Error Handling** - Graceful partial failures
+- 🚫 **Repository Ignoring** - Exclude repos from operations
+
 ## Example Workflow
 
 ```bash
@@ -69,7 +77,8 @@ flow feature cleanup user-auth
 ## Documentation
 
 - 📖 **[Complete Guide](docs/GUIDE.md)** - Detailed usage and examples
-- 🔧 **[Commands Reference](docs/COMMANDS.md)** - All available commands
+- 🔧 **[Commands Reference](docs/COMMANDS.md)** - All available commands  
+- 🎆 **[Advanced Features](docs/ADVANCED.md)** - Selective ops, dry-run, stash
 - 🔐 **[GitHub Integration](docs/GITHUB.md)** - Authentication and repo creation
 - ❓ **[FAQ](docs/FAQ.md)** - Common questions and troubleshooting
 

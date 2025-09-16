@@ -46,10 +46,15 @@ program
     new Command('create')
       .description('Create feature branch across repos')
       .argument('<name>', 'Feature name')
-      .action(async (name) => {
+      .option('--repos <repos>', 'Comma-separated list of specific repos')
+      .option('--dry-run', 'Show what would be done without executing')
+      .option('--stash', 'Stash uncommitted changes before creating branch')
+      .action(async (name, options) => {
         try {
-          await repoOrch.createFeature(name);
-          console.log(chalk.green(`✅ Feature '${name}' created across all repos`));
+          await repoOrch.createFeature(name, options);
+          if (!options.dryRun) {
+            console.log(chalk.green(`✅ Feature '${name}' created`));
+          }
         } catch (error) {
           console.error(chalk.red('❌ Error:', error.message));
         }
@@ -60,10 +65,14 @@ program
       .description('Commit changes across repos')
       .argument('<name>', 'Feature name')
       .option('-m, --message <message>', 'Commit message', 'Update feature')
+      .option('--repos <repos>', 'Comma-separated list of specific repos')
+      .option('--dry-run', 'Show what would be committed without executing')
       .action(async (name, options) => {
         try {
-          await repoOrch.commitFeature(name, options.message);
-          console.log(chalk.green(`✅ Changes committed for feature '${name}'`));
+          await repoOrch.commitFeature(name, options.message, options);
+          if (!options.dryRun) {
+            console.log(chalk.green(`✅ Changes committed for feature '${name}'`));
+          }
         } catch (error) {
           console.error(chalk.red('❌ Error:', error.message));
         }
@@ -99,10 +108,14 @@ program
     new Command('cleanup')
       .description('Cleanup feature branches')
       .argument('<name>', 'Feature name')
-      .action(async (name) => {
+      .option('--repos <repos>', 'Comma-separated list of specific repos')
+      .option('--dry-run', 'Show what would be cleaned up without executing')
+      .action(async (name, options) => {
         try {
-          await repoOrch.cleanupFeature(name);
-          console.log(chalk.green(`✅ Feature '${name}' cleaned up`));
+          await repoOrch.cleanupFeature(name, options);
+          if (!options.dryRun) {
+            console.log(chalk.green(`✅ Feature '${name}' cleaned up`));
+          }
         } catch (error) {
           console.error(chalk.red('❌ Error:', error.message));
         }
@@ -174,6 +187,32 @@ program
       .action(async () => {
         try {
           await repoOrch.showConfig();
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('ignore')
+      .description('Add repository to ignore list')
+      .argument('<repo>', 'Repository name to ignore')
+      .action(async (repo) => {
+        try {
+          await repoOrch.ignoreRepository(repo);
+          console.log(chalk.green(`✅ Added ${repo} to ignore list`));
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('unignore')
+      .description('Remove repository from ignore list')
+      .argument('<repo>', 'Repository name to unignore')
+      .action(async (repo) => {
+        try {
+          await repoOrch.unignoreRepository(repo);
+          console.log(chalk.green(`✅ Removed ${repo} from ignore list`));
         } catch (error) {
           console.error(chalk.red('❌ Error:', error.message));
         }

@@ -17,7 +17,7 @@ A: Absolutely. MultiFlow works with local repositories, GitLab, Bitbucket, or an
 A: `.multiflow.yml` is the new format (v1.2+) with enhanced features. Old `.flow.yml` files are automatically migrated.
 
 **Q: Can I exclude certain repositories?**
-A: Currently, MultiFlow includes all Git repositories in your workspace. Manual exclusion isn't supported yet.
+A: Yes! Create a `.multiflowignore` file or use `flow config ignore <repo>` to exclude repositories from operations.
 
 **Q: What if repositories have different default branches?**
 A: MultiFlow detects each repository's default branch automatically (main, master, develop, etc.).
