@@ -40,7 +40,7 @@ jobs:
         echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
         
     - name: Publish to npm
-      run: npm publish
+      run: npm publish --access public
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         

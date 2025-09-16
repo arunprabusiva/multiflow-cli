@@ -4,12 +4,12 @@
   "description": "Multi-repo workflow orchestration CLI - streamline feature development across multiple repositories",
   "main": "src/cli.js",
   "bin": {
-    "flow": "./src/cli.js"
+    "flow": "src/cli.js"
   },
   "homepage": "https://github.com/arunprabusiva/multiflow-cli",
   "repository": {
     "type": "git",
-    "url": "https://github.com/arunprabusiva/multiflow-cli.git"
+    "url": "git+https://github.com/arunprabusiva/multiflow-cli.git"
   },
   "bugs": {
     "url": "https://github.com/arunprabusiva/multiflow-cli/issues"
