@@ -4,7 +4,6 @@
 
 Stop juggling between repositories! MultiFlow orchestrates Git operations across your entire multi-repo workspace, making feature development seamless and error-free.
 
-[![npm version](https://img.shields.io/npm/v/multiflow-cli.svg)](https://www.npmjs.com/package/multiflow-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 🚀 Why MultiFlow?
@@ -24,7 +23,15 @@ Stop juggling between repositories! MultiFlow orchestrates Git operations across
 
 ## 📦 Installation
 
-**Install from npm (recommended):**
+**Clone and install:**
+```bash
+git clone https://github.com/arunprabusiva/multiflow-cli.git
+cd multiflow-cli
+npm install
+npm link
+```
+
+**Or install from npm (coming soon):**
 ```bash
 npm install -g multiflow-cli
 ```
