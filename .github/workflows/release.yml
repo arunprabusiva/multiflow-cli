@@ -1,0 +1,79 @@
+name: 🚀 Release Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (patch/minor/major)'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+
+jobs:
+  create-release-pr:
+    name: 📝 Create Release PR
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        
+    - name: 📦 Install dependencies
+      run: npm ci
+      
+    - name: 🧪 Run tests
+      run: npm test
+      
+    - name: 🔢 Bump version
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        npm version ${{ github.event.inputs.version }} --no-git-tag-version
+        
+    - name: 📝 Update CLI version
+      run: |
+        VERSION=$(node -p "require('./package.json').version")
+        sed -i "s/\.version('.*')/\.version('$VERSION')/g" src/cli.js
+        sed -i "s/Version: .*/Version: $VERSION');/g" src/cli.js
+        
+    - name: 📝 Create Release PR
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: '🚀 Release v${{ github.event.inputs.version }}'
+        title: '🚀 Release v${{ github.event.inputs.version }}'
+        body: |
+          🚀 **Release Preparation**
+          
+          This PR prepares MultiFlow for a new ${{ github.event.inputs.version }} release.
+          
+          ## Changes
+          - ⬆️ Bumped version to next ${{ github.event.inputs.version }}
+          - 🔄 Updated CLI version strings
+          - ✅ All tests passing
+          
+          ## After Merge
+          1. This will trigger the publish workflow
+          2. Package will be published to npm
+          3. GitHub release will be created
+          4. Version tag will be pushed
+          
+          ## Checklist
+          - [x] Version bumped correctly
+          - [x] Tests pass
+          - [x] CLI version updated
+          - [ ] Ready for release
+        branch: release-prep
+        delete-branch: true

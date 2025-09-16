@@ -5,6 +5,8 @@
 Stop juggling between repositories! MultiFlow orchestrates Git operations across your entire multi-repo workspace, making feature development seamless and error-free.
 
 [![npm version](https://img.shields.io/npm/v/multiflow-cli.svg)](https://www.npmjs.com/package/multiflow-cli)
+[![CI/CD](https://github.com/arunprabusiva/multiflow-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/arunprabusiva/multiflow-cli/actions/workflows/ci.yml)
+[![Security](https://github.com/arunprabusiva/multiflow-cli/actions/workflows/codeql.yml/badge.svg)](https://github.com/arunprabusiva/multiflow-cli/actions/workflows/codeql.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 🚀 Why MultiFlow?

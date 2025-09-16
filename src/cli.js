@@ -10,14 +10,14 @@ const repoOrch = new RepoOrch();
 program
   .name('flow')
   .description('Multi-repo workflow orchestration CLI')
-  .version('1.0.0');
+  .version('1.1.0');
 
 program
   .command('about')
   .description('Show information about MultiFlow')
   .action(() => {
     console.log(chalk.cyan('🌊 MultiFlow - Multi-Repo Workflow CLI'));
-    console.log(chalk.gray('Version: 1.0.0'));
+    console.log(chalk.gray('Version: 1.1.0'));
     console.log(chalk.gray('Created by: Arunprabu Sivapprakasam'));
     console.log(chalk.gray('GitHub: https://github.com/arunprabusiva/multiflow-cli'));
     console.log(chalk.gray('License: MIT'));

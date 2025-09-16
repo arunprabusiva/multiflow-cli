@@ -1,0 +1,79 @@
+name: 🧪 CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: 🧪 Test MultiFlow
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x]
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🟢 Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: 📦 Install dependencies
+      run: npm ci
+      
+    - name: 🧪 Run tests
+      run: npm test
+      
+    - name: 🔍 Test CLI commands
+      run: |
+        npm link
+        flow --version
+        flow --help
+        flow about
+
+  integration-test:
+    name: 🔧 Integration Test
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        
+    - name: 📦 Install and link
+      run: |
+        npm ci
+        npm link
+        
+    - name: 🧪 Create test workspace
+      run: |
+        mkdir test-workspace
+        cd test-workspace
+        
+        # Create mock repos
+        mkdir frontend backend database
+        cd frontend && git init && git config user.email "test@example.com" && git config user.name "Test User" && echo "# Frontend" > README.md && git add . && git commit -m "Initial"
+        cd ../backend && git init && git config user.email "test@example.com" && git config user.name "Test User" && echo "# Backend" > README.md && git add . && git commit -m "Initial"
+        cd ../database && git init && git config user.email "test@example.com" && git config user.name "Test User" && echo "# Database" > README.md && git add . && git commit -m "Initial"
+        cd ..
+        
+        # Test MultiFlow workflow
+        flow init
+        flow feature create test-feature
+        flow status test-feature
+        flow doctor
+        flow checkout master
+        flow feature cleanup test-feature
