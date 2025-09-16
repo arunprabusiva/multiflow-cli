@@ -38,14 +38,6 @@ npm install
 npm link
 ```
 
-**Or clone and install locally:**
-```bash
-git clone https://github.com/arunprabusiva/multiflow-cli.git
-cd multiflow-cli
-npm install
-npm link
-```
-
 ## 🎯 Quick Start
 
 ### 1. **Setup Your Workspace**
@@ -59,8 +51,11 @@ cd /path/to/your/workspace
 # ├── database/     (SQL migrations)
 # └── docs/         (Documentation)
 
-# Initialize MultiFlow
-flow init
+# Authenticate with GitHub (optional)
+flow auth login
+
+# Initialize MultiFlow with auto-repo creation
+flow init --create-missing
 ```
 
 ### 2. **Start a Feature**
@@ -117,7 +112,9 @@ flow feature cleanup payment-system
 
 | Command | Description | Example |
 |---------|-------------|----------|
-| `flow init` | Scan workspace and create config | `flow init` |
+| `flow init` | Scan workspace and create config | `flow init --create-missing` |
+| `flow auth login` | Authenticate with GitHub | `flow auth login` |
+| `flow repo create <name>` | Create GitHub repository | `flow repo create backend --private` |
 | `flow status <feature>` | Show feature status across repos | `flow status auth-system` |
 
 ### Feature Management
@@ -134,6 +131,11 @@ flow feature cleanup payment-system
 
 | Command | Description | Example |
 |---------|-------------|----------|
+| `flow auth status` | Show GitHub authentication status | `flow auth status` |
+| `flow repo link <name>` | Link local repo to GitHub | `flow repo link frontend` |
+| `flow doctor` | Check workspace health | `flow doctor` |
+| `flow checkout <branch>` | Switch branches across all repos | `flow checkout main` |
+| `flow diff <feature>` | Show changes across repos | `flow diff payment-system` |
 | `flow config show` | Show workspace configuration | `flow config show` |
 | `flow config set-default-branch <repo> <branch>` | Set default branch for repo | `flow config set-default-branch frontend main` |
 
