@@ -40,10 +40,7 @@ jobs:
         echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
         
     - name: Publish to npm
-      run: |
-        echo "Publishing to npm..."
-        echo "Note: This may fail if 2FA is required. See PUBLISHING.md for solutions."
-        npm publish --access public
+      run: npm publish --access public
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         
