@@ -111,9 +111,51 @@ program
   .command('status')
   .description('Show feature status')
   .argument('<name>', 'Feature name')
-  .action(async (name) => {
+  .option('-d, --detailed', 'Show detailed status with commit counts')
+  .action(async (name, options) => {
     try {
-      await repoOrch.showStatus(name);
+      if (options.detailed) {
+        await repoOrch.showDetailedStatus(name);
+      } else {
+        await repoOrch.showStatus(name);
+      }
+    } catch (error) {
+      console.error(chalk.red('❌ Error:', error.message));
+    }
+  });
+
+program
+  .command('checkout')
+  .description('Switch branches across all repos')
+  .argument('<branch>', 'Branch name or feature name')
+  .action(async (branch) => {
+    try {
+      await repoOrch.checkoutAll(branch);
+      console.log(chalk.green(`✅ Switched all repos to ${branch}`));
+    } catch (error) {
+      console.error(chalk.red('❌ Error:', error.message));
+    }
+  });
+
+program
+  .command('diff')
+  .description('Show changes across repos')
+  .argument('<feature>', 'Feature name')
+  .option('-s, --summary', 'Show summary only')
+  .action(async (feature, options) => {
+    try {
+      await repoOrch.showDiff(feature, options);
+    } catch (error) {
+      console.error(chalk.red('❌ Error:', error.message));
+    }
+  });
+
+program
+  .command('doctor')
+  .description('Check workspace health')
+  .action(async () => {
+    try {
+      await repoOrch.doctor();
     } catch (error) {
       console.error(chalk.red('❌ Error:', error.message));
     }

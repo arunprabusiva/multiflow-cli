@@ -265,11 +265,56 @@ class RepoOrch {
       try {
         const branches = await git.branchLocal();
         const hasBranch = branches.all.includes(feature.branch);
-        const status = hasBranch ? '✅ ready' : '⬜ untouched';
+        const status = hasBranch ? '✅ ready' : '⚪ untouched';
         
         console.log(`├─ ${repoName}: ${feature.branch} ${status}`);
       } catch (error) {
         console.log(`├─ ${repoName}: ❌ error`);
+      }
+    }
+  }
+
+  async showDetailedStatus(featureName) {
+    await this.loadConfig();
+    const feature = this.config.features[featureName];
+    
+    if (!feature) {
+      throw new Error(`Feature '${featureName}' not found`);
+    }
+    
+    console.log(chalk.bold(`\n📊 ${featureName} - Detailed Status`));
+    console.log('='.repeat(50));
+    
+    for (const repoName of feature.repos) {
+      const repoInfo = this.config.repos[repoName];
+      const git = simpleGit(repoInfo.path);
+      const defaultBranch = repoInfo.defaultBranch || 'main';
+      
+      try {
+        const branches = await git.branchLocal();
+        const hasBranch = branches.all.includes(feature.branch);
+        
+        console.log(`\n📁 ${chalk.bold(repoName)}:`);
+        
+        if (hasBranch) {
+          // Get commit count ahead of default branch
+          const commits = await git.raw(['rev-list', '--count', `${defaultBranch}..${feature.branch}`]);
+          const commitCount = parseInt(commits.trim());
+          
+          // Get file changes
+          const status = await git.checkout(feature.branch).then(() => git.status());
+          
+          console.log(`  🌱 Branch: ${chalk.cyan(feature.branch)}`);
+          console.log(`  📝 Commits ahead: ${chalk.yellow(commitCount)}`);
+          console.log(`  📄 Modified files: ${status.modified.length}`);
+          console.log(`  🆕 New files: ${status.not_added.length}`);
+          console.log(`  🟢 Status: ${chalk.green('Ready')}`);
+        } else {
+          console.log(`  ⚪ Status: ${chalk.gray('Untouched')}`);
+        }
+        
+      } catch (error) {
+        console.log(`  ❌ Error: ${error.message}`);
       }
     }
   }
@@ -307,6 +352,139 @@ class RepoOrch {
       for (const [name, info] of Object.entries(this.config.features)) {
         console.log(`├─ ${name}: ${info.branch}`);
       }
+    }
+  }
+
+  async checkoutAll(branch) {
+    await this.loadConfig();
+    
+    // Check if it's a feature name
+    const feature = this.config.features[branch];
+    const targetBranch = feature ? feature.branch : branch;
+    
+    for (const [repoName, repoInfo] of Object.entries(this.config.repos)) {
+      const git = simpleGit(repoInfo.path);
+      
+      try {
+        await git.checkout(targetBranch);
+        console.log(`✅ ${repoName}: Switched to ${targetBranch}`);
+      } catch (error) {
+        console.log(`⚠️  ${repoName}: ${error.message}`);
+      }
+    }
+  }
+
+  async showDiff(featureName, options = {}) {
+    await this.loadConfig();
+    const feature = this.config.features[featureName];
+    
+    if (!feature) {
+      throw new Error(`Feature '${featureName}' not found`);
+    }
+    
+    console.log(chalk.bold(`\n📋 Changes for ${featureName}`));
+    console.log('='.repeat(40));
+    
+    for (const repoName of feature.repos) {
+      const repoInfo = this.config.repos[repoName];
+      const git = simpleGit(repoInfo.path);
+      const defaultBranch = repoInfo.defaultBranch || 'main';
+      
+      try {
+        console.log(chalk.bold(`\n📁 ${repoName}:`));
+        
+        if (options.summary) {
+          const diff = await git.diffSummary([defaultBranch, feature.branch]);
+          console.log(`  Files changed: ${diff.files.length}`);
+          console.log(`  Insertions: ${chalk.green('+' + diff.insertions)}`);
+          console.log(`  Deletions: ${chalk.red('-' + diff.deletions)}`);
+        } else {
+          const changedFiles = await git.diff(['--name-only', defaultBranch, feature.branch]);
+          if (changedFiles.trim()) {
+            console.log(`  Changed files:`);
+            changedFiles.trim().split('\n').forEach(file => {
+              console.log(`    • ${file}`);
+            });
+          } else {
+            console.log(`  ⚪ No changes`);
+          }
+        }
+      } catch (error) {
+        console.log(`  ❌ Error: ${error.message}`);
+      }
+    }
+  }
+
+  async doctor() {
+    await this.loadConfig();
+    
+    console.log(chalk.bold('🏥 Workspace Health Check'));
+    console.log('========================\n');
+    
+    let healthyCount = 0;
+    let totalRepos = Object.keys(this.config.repos).length;
+    
+    for (const [repoName, repoInfo] of Object.entries(this.config.repos)) {
+      const git = simpleGit(repoInfo.path);
+      let isHealthy = true;
+      
+      console.log(chalk.bold(`📁 ${repoName}:`));
+      
+      try {
+        // Check for uncommitted changes
+        const status = await git.status();
+        if (!status.isClean()) {
+          console.log(`  ⚠️  Uncommitted changes: ${status.files.length} files`);
+          isHealthy = false;
+        } else {
+          console.log(`  ✅ Working directory clean`);
+        }
+        
+        // Check current branch
+        const branch = await git.branchLocal();
+        console.log(`  🌱 Current branch: ${chalk.cyan(branch.current)}`);
+        
+        // Check for unpushed commits (if has remote)
+        if (repoInfo.hasRemote) {
+          try {
+            const ahead = await git.raw(['rev-list', '--count', 'HEAD', '^origin/HEAD']);
+            const aheadCount = parseInt(ahead.trim());
+            if (aheadCount > 0) {
+              console.log(`  ⚠️  Unpushed commits: ${aheadCount}`);
+              isHealthy = false;
+            } else {
+              console.log(`  ✅ Up to date with remote`);
+            }
+          } catch (error) {
+            console.log(`  ⚠️  Cannot check remote status`);
+          }
+        } else {
+          console.log(`  💻 Local repository (no remote)`);
+        }
+        
+        if (isHealthy) {
+          console.log(`  🟢 Overall: ${chalk.green('Healthy')}`);
+          healthyCount++;
+        } else {
+          console.log(`  🟡 Overall: ${chalk.yellow('Needs attention')}`);
+        }
+        
+      } catch (error) {
+        console.log(`  ❌ Error: ${error.message}`);
+        console.log(`  🔴 Overall: ${chalk.red('Unhealthy')}`);
+      }
+      
+      console.log('');
+    }
+    
+    // Summary
+    console.log(chalk.bold('📊 Summary:'));
+    console.log(`Healthy repositories: ${chalk.green(healthyCount)}/${totalRepos}`);
+    
+    if (healthyCount === totalRepos) {
+      console.log(chalk.green('✅ All repositories are healthy!'));
+    } else {
+      console.log(chalk.yellow('⚠️  Some repositories need attention'));
     }
   }
 }
