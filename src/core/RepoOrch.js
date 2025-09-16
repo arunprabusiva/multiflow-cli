@@ -4,13 +4,16 @@ const simpleGit = require('simple-git');
 const YAML = require('yaml');
 const chalk = require('chalk');
 const GitHubClient = require('./GitHubClient');
+const GitHubAuth = require('./GitHubAuth');
 const ConflictDetector = require('./ConflictDetector');
+const inquirer = require('inquirer');
 
 class RepoOrch {
   constructor() {
-    this.configPath = '.flow.yml';
+    this.configPath = '.multiflow.yml';
     this.config = null;
     this.github = process.env.GITHUB_TOKEN ? new GitHubClient(process.env.GITHUB_TOKEN) : null;
+    this.githubAuth = new GitHubAuth();
   }
 
   async loadConfig() {
@@ -26,21 +29,234 @@ class RepoOrch {
     await fs.writeFile(this.configPath, YAML.stringify(this.config));
   }
 
-  async init() {
+  async init(options = {}) {
     await this.loadConfig();
     const repos = await this.scanRepos();
+    
+    console.log(chalk.blue(`\n🔍 Found ${repos.length} local repositories`));
+    
+    // Check for missing remotes if createMissing option is enabled
+    if (options.createMissing) {
+      await this.handleMissingRemotes(repos);
+    }
     
     this.config.repos = {};
     for (const repo of repos) {
       this.config.repos[repo.name] = {
         path: repo.path,
         hasRemote: repo.hasRemote,
-        defaultBranch: repo.defaultBranch
+        defaultBranch: repo.defaultBranch,
+        privacy: repo.privacy || 'public',
+        autoCreate: repo.autoCreate || false
+      };
+    }
+    
+    // Initialize workspace settings if not exists
+    if (!this.config.workspace) {
+      this.config.workspace = {
+        name: path.basename(process.cwd()),
+        created: new Date().toISOString(),
+        defaultPrivacy: 'public',
+        autoCreateRepos: false
       };
     }
     
     await this.saveConfig();
-    console.log(`Found ${repos.length} repositories`);
+    console.log(chalk.green(`\n✅ Workspace initialized with ${repos.length} repositories`));
+    
+    // Show configuration summary
+    this.showInitSummary();
+  }
+
+  showInitSummary() {
+    console.log(chalk.bold('\n📋 Configuration Summary:'));
+    console.log(`Config file: ${chalk.cyan(this.configPath)}`);
+    console.log(`Repositories: ${Object.keys(this.config.repos).length}`);
+    console.log(`Active features: ${Object.keys(this.config.features).length}`);
+    
+    const withRemotes = Object.values(this.config.repos).filter(r => r.hasRemote).length;
+    const withoutRemotes = Object.keys(this.config.repos).length - withRemotes;
+    
+    if (withRemotes > 0) {
+      console.log(`${chalk.green('✅')} ${withRemotes} repositories with remotes`);
+    }
+    if (withoutRemotes > 0) {
+      console.log(`${chalk.yellow('⚠️')} ${withoutRemotes} repositories without remotes`);
+      console.log(chalk.gray('   Use --create-missing to auto-create GitHub repositories'));
+    }
+  }
+
+  async handleMissingRemotes(repos) {
+    const reposWithoutRemotes = repos.filter(repo => !repo.hasRemote);
+    
+    if (reposWithoutRemotes.length === 0) {
+      console.log(chalk.green('✅ All repositories have remotes'));
+      return;
+    }
+    
+    console.log(chalk.yellow(`\n⚠️  Found ${reposWithoutRemotes.length} repositories without remotes:`));
+    reposWithoutRemotes.forEach(repo => {
+      console.log(`   • ${repo.name}`);
+    });
+    
+    const { shouldCreate } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'shouldCreate',
+        message: 'Create GitHub repositories for local folders?',
+        default: true
+      }
+    ]);
+    
+    if (!shouldCreate) {
+      return;
+    }
+    
+    // Get privacy preference
+    const { defaultPrivacy } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'defaultPrivacy',
+        message: 'Default privacy for new repositories:',
+        choices: [
+          { name: 'Public (visible to everyone)', value: 'public' },
+          { name: 'Private (only you can see)', value: 'private' }
+        ],
+        default: 'public'
+      }
+    ]);
+    
+    // Create repositories
+    for (const repo of reposWithoutRemotes) {
+      await this.createGitHubRepository(repo.name, {
+        private: defaultPrivacy === 'private',
+        description: `${repo.name} repository created by MultiFlow`
+      });
+    }
+  }
+
+  async createGitHubRepository(name, options = {}) {
+    try {
+      console.log(chalk.blue(`\n🔄 Creating GitHub repository: ${name}`));
+      
+      const repo = await this.githubAuth.createRepository(name, {
+        private: options.private || false,
+        description: options.description,
+        autoInit: false // We already have local content
+      });
+      
+      // Add remote to local repository
+      const git = simpleGit(name);
+      await git.addRemote('origin', repo.clone_url);
+      
+      // Push existing content
+      const branches = await git.branchLocal();
+      if (branches.current) {
+        await git.push('origin', branches.current);
+      }
+      
+      console.log(chalk.green(`✅ Created and linked: ${repo.html_url}`));
+      
+      return repo;
+    } catch (error) {
+      console.log(chalk.red(`❌ Failed to create ${name}: ${error.message}`));
+      throw error;
+    }
+  }
+
+  async linkRepository(repoName, remoteUrl) {
+    await this.loadConfig();
+    
+    if (!this.config.repos[repoName]) {
+      throw new Error(`Repository '${repoName}' not found in workspace`);
+    }
+    
+    const repoPath = this.config.repos[repoName].path;
+    const git = simpleGit(repoPath);
+    
+    try {
+      // Check if remote already exists
+      const remotes = await git.getRemotes(true);
+      const originExists = remotes.some(remote => remote.name === 'origin');
+      
+      if (originExists) {
+        const { shouldOverwrite } = await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'shouldOverwrite',
+            message: `Repository '${repoName}' already has an origin remote. Overwrite?`,
+            default: false
+          }
+        ]);
+        
+        if (!shouldOverwrite) {
+          console.log(chalk.yellow('Operation cancelled'));
+          return;
+        }
+        
+        await git.removeRemote('origin');
+      }
+      
+      // If no remote URL provided, try to create GitHub repo
+      if (!remoteUrl) {
+        try {
+          const user = await this.githubAuth.getAuthenticatedUser();
+          const repoExists = await this.githubAuth.repositoryExists(user.login, repoName);
+          
+          if (!repoExists) {
+            const { shouldCreate } = await inquirer.prompt([
+              {
+                type: 'confirm',
+                name: 'shouldCreate',
+                message: `GitHub repository '${repoName}' doesn't exist. Create it?`,
+                default: true
+              }
+            ]);
+            
+            if (shouldCreate) {
+              const repo = await this.createGitHubRepository(repoName);
+              remoteUrl = repo.clone_url;
+            } else {
+              throw new Error('Cannot link without remote URL');
+            }
+          } else {
+            remoteUrl = `https://github.com/${user.login}/${repoName}.git`;
+          }
+        } catch (error) {
+          throw new Error(`Authentication required. Run: flow auth login`);
+        }
+      }
+      
+      // Add remote
+      await git.addRemote('origin', remoteUrl);
+      
+      // Update config
+      this.config.repos[repoName].hasRemote = true;
+      await this.saveConfig();
+      
+      console.log(chalk.green(`✅ Linked ${repoName} to ${remoteUrl}`));
+      
+      // Optionally push existing content
+      const branches = await git.branchLocal();
+      if (branches.current) {
+        const { shouldPush } = await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'shouldPush',
+            message: `Push existing content to remote?`,
+            default: true
+          }
+        ]);
+        
+        if (shouldPush) {
+          await git.push('origin', branches.current);
+          console.log(chalk.green(`✅ Pushed ${branches.current} to remote`));
+        }
+      }
+      
+    } catch (error) {
+      throw new Error(`Failed to link repository: ${error.message}`);
+    }
   }
 
   async scanRepos() {
@@ -319,42 +535,6 @@ class RepoOrch {
     }
   }
 
-  async setDefaultBranch(repoName, branchName) {
-    await this.loadConfig();
-    
-    if (!this.config.repos[repoName]) {
-      throw new Error(`Repository '${repoName}' not found`);
-    }
-    
-    this.config.repos[repoName].defaultBranch = branchName;
-    await this.saveConfig();
-  }
-
-  async showConfig() {
-    await this.loadConfig();
-    
-    console.log(chalk.bold('\n📄 Workspace Configuration'));
-    console.log('========================\n');
-    
-    console.log(chalk.bold('Repositories:'));
-    for (const [name, info] of Object.entries(this.config.repos)) {
-      console.log(`├─ ${name}:`);
-      console.log(`│  ├─ Path: ${info.path}`);
-      console.log(`│  ├─ Default Branch: ${chalk.cyan(info.defaultBranch || 'main')}`);
-      console.log(`│  └─ Remote: ${info.hasRemote ? '✅ Yes' : '⚪ No'}`);
-    }
-    
-    console.log('\n' + chalk.bold('Active Features:'));
-    const featureCount = Object.keys(this.config.features).length;
-    if (featureCount === 0) {
-      console.log('⚪ No active features');
-    } else {
-      for (const [name, info] of Object.entries(this.config.features)) {
-        console.log(`├─ ${name}: ${info.branch}`);
-      }
-    }
-  }
-
   async checkoutAll(branch) {
     await this.loadConfig();
     
@@ -486,6 +666,42 @@ class RepoOrch {
     } else {
       console.log(chalk.yellow('⚠️  Some repositories need attention'));
     }
+  }
+
+  async showConfig() {
+    await this.loadConfig();
+    
+    console.log(chalk.bold('\n📄 Workspace Configuration'));
+    console.log('========================\n');
+    
+    console.log(chalk.bold('Repositories:'));
+    for (const [name, info] of Object.entries(this.config.repos)) {
+      console.log(`├─ ${name}:`);
+      console.log(`│  ├─ Path: ${info.path}`);
+      console.log(`│  ├─ Default Branch: ${chalk.cyan(info.defaultBranch || 'main')}`);
+      console.log(`│  └─ Remote: ${info.hasRemote ? '✅ Yes' : '⚪ No'}`);
+    }
+    
+    console.log('\n' + chalk.bold('Active Features:'));
+    const featureCount = Object.keys(this.config.features).length;
+    if (featureCount === 0) {
+      console.log('⚪ No active features');
+    } else {
+      for (const [name, info] of Object.entries(this.config.features)) {
+        console.log(`├─ ${name}: ${info.branch}`);
+      }
+    }
+  }
+
+  async setDefaultBranch(repoName, branchName) {
+    await this.loadConfig();
+    
+    if (!this.config.repos[repoName]) {
+      throw new Error(`Repository '${repoName}' not found`);
+    }
+    
+    this.config.repos[repoName].defaultBranch = branchName;
+    await this.saveConfig();
   }
 }
 

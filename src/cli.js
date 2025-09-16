@@ -26,12 +26,66 @@ program
   });
 
 program
+  .command('auth')
+  .description('GitHub authentication commands')
+  .addCommand(
+    new Command('login')
+      .description('Login to GitHub (browser-based OAuth)')
+      .action(async () => {
+        try {
+          const result = await repoOrch.githubAuth.login();
+          console.log(chalk.green(`✅ Successfully authenticated as ${result.user.name || result.user.login}`));
+        } catch (error) {
+          console.error(chalk.red('❌ Authentication failed:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('token')
+      .description('Login with personal access token')
+      .argument('<token>', 'GitHub personal access token')
+      .action(async (token) => {
+        try {
+          await repoOrch.githubAuth.loginWithToken(token);
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('logout')
+      .description('Logout from GitHub')
+      .action(async () => {
+        try {
+          await repoOrch.githubAuth.logout();
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('status')
+      .description('Show authentication status')
+      .action(async () => {
+        try {
+          const user = await repoOrch.githubAuth.getAuthenticatedUser();
+          console.log(chalk.green(`✅ Authenticated as ${user.name || user.login}`));
+          console.log(chalk.gray(`   Email: ${user.email || 'Not public'}`);
+          console.log(chalk.gray(`   Profile: ${user.html_url}`));
+        } catch (error) {
+          console.log(chalk.yellow('⚠️  Not authenticated'));
+          console.log(chalk.gray('   Run: flow auth login'));
+        }
+      })
+  );
+
+program
   .command('init')
   .description('Initialize workspace and scan for repositories')
-  .action(async () => {
+  .option('--create-missing', 'Create GitHub repositories for local folders without remotes')
+  .action(async (options) => {
     try {
-      await repoOrch.init();
-      console.log(chalk.green('✅ Workspace initialized successfully'));
+      await repoOrch.init(options);
     } catch (error) {
       console.error(chalk.red('❌ Error:', error.message));
     }
@@ -160,6 +214,44 @@ program
       console.error(chalk.red('❌ Error:', error.message));
     }
   });
+
+program
+  .command('repo')
+  .description('Repository management commands')
+  .addCommand(
+    new Command('create')
+      .description('Create a new GitHub repository')
+      .argument('<name>', 'Repository name')
+      .option('--private', 'Create as private repository')
+      .option('--description <desc>', 'Repository description')
+      .option('--template <template>', 'Repository template')
+      .action(async (name, options) => {
+        try {
+          const repo = await repoOrch.createGitHubRepository(name, {
+            private: options.private || false,
+            description: options.description,
+            template: options.template
+          });
+          console.log(chalk.green(`✅ Repository created: ${repo.html_url}`));
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('link')
+      .description('Link local repository to GitHub')
+      .argument('<name>', 'Local repository name')
+      .argument('[remote-url]', 'GitHub repository URL (optional if authenticated)')
+      .action(async (name, remoteUrl) => {
+        try {
+          await repoOrch.linkRepository(name, remoteUrl);
+          console.log(chalk.green(`✅ Repository linked successfully`));
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  );
 
 program
   .command('config')
