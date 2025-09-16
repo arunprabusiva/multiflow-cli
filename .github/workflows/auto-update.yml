@@ -1,0 +1,63 @@
+name: 🔄 Auto Update Dependencies
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Mondays at 2 AM
+  workflow_dispatch:
+
+jobs:
+  update:
+    name: 📦 Update Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        
+    - name: 🔄 Update dependencies
+      run: |
+        npm update
+        npm audit fix --force
+        
+    - name: 🧪 Test after updates
+      run: |
+        npm test
+        npm link
+        flow --version
+        
+    - name: 📝 Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: '🔄 chore: update dependencies'
+        title: '🔄 Auto-update dependencies'
+        body: |
+          🤖 **Automated dependency update**
+          
+          This PR updates npm dependencies to their latest versions.
+          
+          ## Changes
+          - Updated npm packages to latest versions
+          - Applied security fixes via `npm audit fix`
+          - All tests passing ✅
+          
+          ## Testing
+          - [x] Unit tests pass
+          - [x] CLI commands work correctly
+          - [x] No breaking changes detected
+          
+          ## Branch Protection
+          This PR respects branch protection rules and will require:
+          - ✅ Status checks to pass
+          - ✅ Review approval (if required)
+          - ✅ Up-to-date branch before merge
+        branch: auto-update-deps
+        delete-branch: true

@@ -10,14 +10,14 @@ const repoOrch = new RepoOrch();
 program
   .name('flow')
   .description('Multi-repo workflow orchestration CLI')
-  .version('1.0.0');
+  .version('1.1.0');
 
 program
   .command('about')
   .description('Show information about MultiFlow')
   .action(() => {
     console.log(chalk.cyan('🌊 MultiFlow - Multi-Repo Workflow CLI'));
-    console.log(chalk.gray('Version: 1.0.0'));
+    console.log(chalk.gray('Version: 1.1.0'));
     console.log(chalk.gray('Created by: Arunprabu Sivapprakasam'));
     console.log(chalk.gray('GitHub: https://github.com/arunprabusiva/multiflow-cli'));
     console.log(chalk.gray('License: MIT'));
@@ -111,9 +111,51 @@ program
   .command('status')
   .description('Show feature status')
   .argument('<name>', 'Feature name')
-  .action(async (name) => {
+  .option('-d, --detailed', 'Show detailed status with commit counts')
+  .action(async (name, options) => {
     try {
-      await repoOrch.showStatus(name);
+      if (options.detailed) {
+        await repoOrch.showDetailedStatus(name);
+      } else {
+        await repoOrch.showStatus(name);
+      }
+    } catch (error) {
+      console.error(chalk.red('❌ Error:', error.message));
+    }
+  });
+
+program
+  .command('checkout')
+  .description('Switch branches across all repos')
+  .argument('<branch>', 'Branch name or feature name')
+  .action(async (branch) => {
+    try {
+      await repoOrch.checkoutAll(branch);
+      console.log(chalk.green(`✅ Switched all repos to ${branch}`));
+    } catch (error) {
+      console.error(chalk.red('❌ Error:', error.message));
+    }
+  });
+
+program
+  .command('diff')
+  .description('Show changes across repos')
+  .argument('<feature>', 'Feature name')
+  .option('-s, --summary', 'Show summary only')
+  .action(async (feature, options) => {
+    try {
+      await repoOrch.showDiff(feature, options);
+    } catch (error) {
+      console.error(chalk.red('❌ Error:', error.message));
+    }
+  });
+
+program
+  .command('doctor')
+  .description('Check workspace health')
+  .action(async () => {
+    try {
+      await repoOrch.doctor();
     } catch (error) {
       console.error(chalk.red('❌ Error:', error.message));
     }

@@ -19,10 +19,11 @@ try {
 
   // Test version command
   const versionOutput = execSync(`node "${cliPath}" --version`, { encoding: 'utf8' });
-  if (versionOutput.includes('1.0.0')) {
+  const packageJson = require('../package.json');
+  if (versionOutput.includes(packageJson.version)) {
     console.log('✅ CLI version command works');
   } else {
-    throw new Error('CLI version output incorrect');
+    throw new Error(`CLI version output incorrect. Expected: ${packageJson.version}, Got: ${versionOutput}`);
   }
 
   console.log('🎉 All tests passed!');
