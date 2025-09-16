@@ -9,7 +9,7 @@ const repoOrch = new RepoOrch();
 
 program
   .name('flow')
-  .description('Multi-repo workflow orchestration CLI')
+  .description('Coordinate Git operations across multiple repositories')
   .version('1.2.0');
 
 program
@@ -25,59 +25,7 @@ program
     console.log(chalk.yellow('✨ Streamline feature development across multiple repositories'));
   });
 
-program
-  .command('auth')
-  .description('GitHub authentication commands')
-  .addCommand(
-    new Command('login')
-      .description('Login to GitHub (browser-based OAuth)')
-      .action(async () => {
-        try {
-          const result = await repoOrch.githubAuth.login();
-          console.log(chalk.green(`✅ Successfully authenticated as ${result.user.name || result.user.login}`));
-        } catch (error) {
-          console.error(chalk.red('❌ Authentication failed:', error.message));
-        }
-      })
-  )
-  .addCommand(
-    new Command('token')
-      .description('Login with personal access token')
-      .argument('<token>', 'GitHub personal access token')
-      .action(async (token) => {
-        try {
-          await repoOrch.githubAuth.loginWithToken(token);
-        } catch (error) {
-          console.error(chalk.red('❌ Error:', error.message));
-        }
-      })
-  )
-  .addCommand(
-    new Command('logout')
-      .description('Logout from GitHub')
-      .action(async () => {
-        try {
-          await repoOrch.githubAuth.logout();
-        } catch (error) {
-          console.error(chalk.red('❌ Error:', error.message));
-        }
-      })
-  )
-  .addCommand(
-    new Command('status')
-      .description('Show authentication status')
-      .action(async () => {
-        try {
-          const user = await repoOrch.githubAuth.getAuthenticatedUser();
-          console.log(chalk.green(`✅ Authenticated as ${user.name || user.login}`));
-          console.log(chalk.gray(`   Email: ${user.email || 'Not public'}`);
-          console.log(chalk.gray(`   Profile: ${user.html_url}`));
-        } catch (error) {
-          console.log(chalk.yellow('⚠️  Not authenticated'));
-          console.log(chalk.gray('   Run: flow auth login'));
-        }
-      })
-  );
+
 
 program
   .command('init')
@@ -215,61 +163,11 @@ program
     }
   });
 
-program
-  .command('repo')
-  .description('Repository management commands')
-  .addCommand(
-    new Command('create')
-      .description('Create a new GitHub repository')
-      .argument('<name>', 'Repository name')
-      .option('--private', 'Create as private repository')
-      .option('--description <desc>', 'Repository description')
-      .option('--template <template>', 'Repository template')
-      .action(async (name, options) => {
-        try {
-          const repo = await repoOrch.createGitHubRepository(name, {
-            private: options.private || false,
-            description: options.description,
-            template: options.template
-          });
-          console.log(chalk.green(`✅ Repository created: ${repo.html_url}`));
-        } catch (error) {
-          console.error(chalk.red('❌ Error:', error.message));
-        }
-      })
-  )
-  .addCommand(
-    new Command('link')
-      .description('Link local repository to GitHub')
-      .argument('<name>', 'Local repository name')
-      .argument('[remote-url]', 'GitHub repository URL (optional if authenticated)')
-      .action(async (name, remoteUrl) => {
-        try {
-          await repoOrch.linkRepository(name, remoteUrl);
-          console.log(chalk.green(`✅ Repository linked successfully`));
-        } catch (error) {
-          console.error(chalk.red('❌ Error:', error.message));
-        }
-      })
-  );
+
 
 program
   .command('config')
   .description('Configure workspace settings')
-  .addCommand(
-    new Command('set-default-branch')
-      .description('Set default branch for a repository')
-      .argument('<repo>', 'Repository name')
-      .argument('<branch>', 'Default branch name')
-      .action(async (repo, branch) => {
-        try {
-          await repoOrch.setDefaultBranch(repo, branch);
-          console.log(chalk.green(`✅ Set default branch for ${repo} to ${branch}`));
-        } catch (error) {
-          console.error(chalk.red('❌ Error:', error.message));
-        }
-      })
-  )
   .addCommand(
     new Command('show')
       .description('Show current configuration')
@@ -278,6 +176,35 @@ program
           await repoOrch.showConfig();
         } catch (error) {
           console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  );
+
+// GitHub integration commands (advanced)
+program
+  .command('auth')
+  .description('GitHub authentication (optional)')
+  .addCommand(
+    new Command('token')
+      .description('Login with GitHub token')
+      .argument('<token>', 'GitHub personal access token')
+      .action(async (token) => {
+        try {
+          await repoOrch.githubAuth.loginWithToken(token);
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('status')
+      .description('Show authentication status')
+      .action(async () => {
+        try {
+          const user = await repoOrch.githubAuth.getAuthenticatedUser();
+          console.log(chalk.green(`✅ Authenticated as ${user.name || user.login}`));
+        } catch (error) {
+          console.log(chalk.yellow('⚠️  Not authenticated (GitHub features disabled)'));
         }
       })
   );

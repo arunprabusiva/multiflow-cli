@@ -37,7 +37,12 @@ class RepoOrch {
     
     // Check for missing remotes if createMissing option is enabled
     if (options.createMissing) {
-      await this.handleMissingRemotes(repos);
+      try {
+        await this.handleMissingRemotes(repos);
+      } catch (error) {
+        console.log(chalk.yellow(`⚠️  GitHub integration skipped: ${error.message}`));
+        console.log(chalk.gray('   MultiFlow works great without GitHub integration!'));
+      }
     }
     
     this.config.repos = {};

@@ -45,95 +45,15 @@ class GitHubAuth {
   }
 
   async login() {
-    console.log(chalk.blue('🔐 GitHub OAuth Login'));
-    console.log('Opening browser for GitHub authentication...\n');
-
-    return new Promise((resolve, reject) => {
-      const server = http.createServer(async (req, res) => {
-        const parsedUrl = url.parse(req.url, true);
-        
-        if (parsedUrl.pathname === '/callback') {
-          const { code, error } = parsedUrl.query;
-          
-          if (error) {
-            res.writeHead(400, { 'Content-Type': 'text/html' });
-            res.end(`
-              <html>
-                <body>
-                  <h1>❌ Authentication Failed</h1>
-                  <p>Error: ${error}</p>
-                  <p>You can close this window.</p>
-                </body>
-              </html>
-            `);
-            server.close();
-            reject(new Error(`GitHub OAuth error: ${error}`));
-            return;
-          }
-
-          if (code) {
-            try {
-              // Exchange code for token
-              const token = await this.exchangeCodeForToken(code);
-              await this.saveToken(token);
-              
-              // Initialize Octokit with token
-              this.octokit = new Octokit({ auth: token });
-              
-              // Get user info
-              const { data: user } = await this.octokit.rest.users.getAuthenticated();
-              
-              res.writeHead(200, { 'Content-Type': 'text/html' });
-              res.end(`
-                <html>
-                  <body>
-                    <h1>✅ Authentication Successful!</h1>
-                    <p>Welcome, ${user.name || user.login}!</p>
-                    <p>You can close this window and return to your terminal.</p>
-                  </body>
-                </html>
-              `);
-              
-              server.close();
-              resolve({ token, user });
-            } catch (error) {
-              res.writeHead(500, { 'Content-Type': 'text/html' });
-              res.end(`
-                <html>
-                  <body>
-                    <h1>❌ Token Exchange Failed</h1>
-                    <p>Error: ${error.message}</p>
-                    <p>You can close this window.</p>
-                  </body>
-                </html>
-              `);
-              server.close();
-              reject(error);
-            }
-          }
-        } else {
-          res.writeHead(404);
-          res.end('Not found');
-        }
-      });
-
-      server.listen(8080, () => {
-        const authUrl = `https://github.com/login/oauth/authorize?client_id=${this.clientId}&scope=repo,user&redirect_uri=http://localhost:8080/callback`;
-        open(authUrl);
-      });
-
-      // Timeout after 5 minutes
-      setTimeout(() => {
-        server.close();
-        reject(new Error('Authentication timeout'));
-      }, 300000);
-    });
-  }
-
-  async exchangeCodeForToken(code) {
-    // This would normally exchange the code for a token via GitHub's OAuth API
-    // For now, we'll use a personal access token approach
-    throw new Error('OAuth flow requires GitHub App setup. Please use: flow auth token <your-token>');
+    console.log(chalk.yellow('📝 GitHub OAuth login not yet available.'));
+    console.log('Please use: flow auth token <your-github-token>');
+    console.log('');
+    console.log('To get a token:');
+    console.log('1. Go to https://github.com/settings/tokens');
+    console.log('2. Generate new token with "repo" scope');
+    console.log('3. Run: flow auth token <your-token>');
+    
+    throw new Error('Use personal access token for now');
   }
 
   async loginWithToken(token) {
