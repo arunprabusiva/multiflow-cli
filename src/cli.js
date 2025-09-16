@@ -9,29 +9,32 @@ const repoOrch = new RepoOrch();
 
 program
   .name('flow')
-  .description('Multi-repo workflow orchestration CLI')
-  .version('1.1.0');
+  .description('Coordinate Git operations across multiple repositories')
+  .version('1.2.0');
 
 program
   .command('about')
   .description('Show information about MultiFlow')
   .action(() => {
     console.log(chalk.cyan('🌊 MultiFlow - Multi-Repo Workflow CLI'));
-    console.log(chalk.gray('Version: 1.1.0'));
+    console.log(chalk.gray('Version: 1.2.0'));
     console.log(chalk.gray('Created by: Arunprabu Sivapprakasam'));
     console.log(chalk.gray('GitHub: https://github.com/arunprabusiva/multiflow-cli'));
+    console.log(chalk.gray('LinkedIn: https://linkedin.com/in/arunprabusiva'));
     console.log(chalk.gray('License: MIT'));
     console.log('');
     console.log(chalk.yellow('✨ Streamline feature development across multiple repositories'));
   });
 
+
+
 program
   .command('init')
   .description('Initialize workspace and scan for repositories')
-  .action(async () => {
+  .option('--create-missing', 'Create GitHub repositories for local folders without remotes')
+  .action(async (options) => {
     try {
-      await repoOrch.init();
-      console.log(chalk.green('✅ Workspace initialized successfully'));
+      await repoOrch.init(options);
     } catch (error) {
       console.error(chalk.red('❌ Error:', error.message));
     }
@@ -44,10 +47,15 @@ program
     new Command('create')
       .description('Create feature branch across repos')
       .argument('<name>', 'Feature name')
-      .action(async (name) => {
+      .option('--repos <repos>', 'Comma-separated list of specific repos')
+      .option('--dry-run', 'Show what would be done without executing')
+      .option('--stash', 'Stash uncommitted changes before creating branch')
+      .action(async (name, options) => {
         try {
-          await repoOrch.createFeature(name);
-          console.log(chalk.green(`✅ Feature '${name}' created across all repos`));
+          await repoOrch.createFeature(name, options);
+          if (!options.dryRun) {
+            console.log(chalk.green(`✅ Feature '${name}' created`));
+          }
         } catch (error) {
           console.error(chalk.red('❌ Error:', error.message));
         }
@@ -58,10 +66,14 @@ program
       .description('Commit changes across repos')
       .argument('<name>', 'Feature name')
       .option('-m, --message <message>', 'Commit message', 'Update feature')
+      .option('--repos <repos>', 'Comma-separated list of specific repos')
+      .option('--dry-run', 'Show what would be committed without executing')
       .action(async (name, options) => {
         try {
-          await repoOrch.commitFeature(name, options.message);
-          console.log(chalk.green(`✅ Changes committed for feature '${name}'`));
+          await repoOrch.commitFeature(name, options.message, options);
+          if (!options.dryRun) {
+            console.log(chalk.green(`✅ Changes committed for feature '${name}'`));
+          }
         } catch (error) {
           console.error(chalk.red('❌ Error:', error.message));
         }
@@ -97,10 +109,14 @@ program
     new Command('cleanup')
       .description('Cleanup feature branches')
       .argument('<name>', 'Feature name')
-      .action(async (name) => {
+      .option('--repos <repos>', 'Comma-separated list of specific repos')
+      .option('--dry-run', 'Show what would be cleaned up without executing')
+      .action(async (name, options) => {
         try {
-          await repoOrch.cleanupFeature(name);
-          console.log(chalk.green(`✅ Feature '${name}' cleaned up`));
+          await repoOrch.cleanupFeature(name, options);
+          if (!options.dryRun) {
+            console.log(chalk.green(`✅ Feature '${name}' cleaned up`));
+          }
         } catch (error) {
           console.error(chalk.red('❌ Error:', error.message));
         }
@@ -161,23 +177,11 @@ program
     }
   });
 
+
+
 program
   .command('config')
   .description('Configure workspace settings')
-  .addCommand(
-    new Command('set-default-branch')
-      .description('Set default branch for a repository')
-      .argument('<repo>', 'Repository name')
-      .argument('<branch>', 'Default branch name')
-      .action(async (repo, branch) => {
-        try {
-          await repoOrch.setDefaultBranch(repo, branch);
-          console.log(chalk.green(`✅ Set default branch for ${repo} to ${branch}`));
-        } catch (error) {
-          console.error(chalk.red('❌ Error:', error.message));
-        }
-      })
-  )
   .addCommand(
     new Command('show')
       .description('Show current configuration')
@@ -186,6 +190,61 @@ program
           await repoOrch.showConfig();
         } catch (error) {
           console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('ignore')
+      .description('Add repository to ignore list')
+      .argument('<repo>', 'Repository name to ignore')
+      .action(async (repo) => {
+        try {
+          await repoOrch.ignoreRepository(repo);
+          console.log(chalk.green(`✅ Added ${repo} to ignore list`));
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('unignore')
+      .description('Remove repository from ignore list')
+      .argument('<repo>', 'Repository name to unignore')
+      .action(async (repo) => {
+        try {
+          await repoOrch.unignoreRepository(repo);
+          console.log(chalk.green(`✅ Removed ${repo} from ignore list`));
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  );
+
+// GitHub integration commands (advanced)
+program
+  .command('auth')
+  .description('GitHub authentication (optional)')
+  .addCommand(
+    new Command('token')
+      .description('Login with GitHub token')
+      .argument('<token>', 'GitHub personal access token')
+      .action(async (token) => {
+        try {
+          await repoOrch.githubAuth.loginWithToken(token);
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('status')
+      .description('Show authentication status')
+      .action(async () => {
+        try {
+          const user = await repoOrch.githubAuth.getAuthenticatedUser();
+          console.log(chalk.green(`✅ Authenticated as ${user.name || user.login}`));
+        } catch (error) {
+          console.log(chalk.yellow('⚠️  Not authenticated (GitHub features disabled)'));
         }
       })
   );

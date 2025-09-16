@@ -1,6 +1,6 @@
 {
   "name": "multiflow-cli",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Multi-repo workflow orchestration CLI - streamline feature development across multiple repositories",
   "main": "src/cli.js",
   "bin": {
@@ -43,7 +43,8 @@
   ],
   "author": {
     "name": "Arunprabu Sivapprakasam",
-    "url": "https://github.com/arunprabusiva"
+    "url": "https://github.com/arunprabusiva",
+    "linkedin": "https://linkedin.com/in/arunprabusiva"
   },
   "contributors": [
     {
