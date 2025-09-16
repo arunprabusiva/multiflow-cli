@@ -10,6 +10,7 @@ PUBLISH.md
 test-multiflow.sh
 test-multiflow.bat
 test-npm-install.sh
+push-to-github.md
 
 # Test directories
 multiflow-test*/
@@ -17,3 +18,9 @@ test-workspace/
 
 # Package files
 *.tgz
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
