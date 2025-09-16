@@ -87,6 +87,12 @@ flow feature cleanup user-auth
 - Node.js 16+
 - Git repositories with at least one commit
 
+## Author
+
+**Arunprabu Sivapprakasam**
+- GitHub: [@arunprabusiva](https://github.com/arunprabusiva)
+- LinkedIn: [Connect with me](https://linkedin.com/in/arunprabusiva)
+
 ## License
 
 MIT © [Arunprabu Sivapprakasam](https://github.com/arunprabusiva)

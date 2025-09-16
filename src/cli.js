@@ -20,6 +20,7 @@ program
     console.log(chalk.gray('Version: 1.2.0'));
     console.log(chalk.gray('Created by: Arunprabu Sivapprakasam'));
     console.log(chalk.gray('GitHub: https://github.com/arunprabusiva/multiflow-cli'));
+    console.log(chalk.gray('LinkedIn: https://linkedin.com/in/arunprabusiva'));
     console.log(chalk.gray('License: MIT'));
     console.log('');
     console.log(chalk.yellow('✨ Streamline feature development across multiple repositories'));
