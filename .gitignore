@@ -24,3 +24,17 @@ test-workspace/
 .vscode/
 *.swp
 *.swo
+
+# Demo and video files
+demo-workspace/
+Dockerfile.demo
+demo.sh
+demo.bat
+docker-demo.bat
+enterprise-demo.*
+linkedin-post.md
+multiflow-demo.*
+quick-record.sh
+record-demo.bat
+setup-demo-repos.bat
+enterprise-linkedin-post.md
