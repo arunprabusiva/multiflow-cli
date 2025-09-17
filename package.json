@@ -4,7 +4,7 @@
   "description": "Multi-repo workflow orchestration CLI - streamline feature development across multiple repositories",
   "main": "src/cli.js",
   "bin": {
-    "flow": "./src/cli.js"
+    "flow": "src/cli.js"
   },
   "homepage": "https://github.com/arunprabusiva/multiflow-cli",
   "repository": {
@@ -26,7 +26,7 @@
     "yaml": "^2.3.2",
     "inquirer": "^9.2.10",
     "chalk": "^4.1.2",
-    "open": "^9.1.0",
+    "open": "^8.4.2",
     "@octokit/rest": "^20.0.2"
   },
   "keywords": [
