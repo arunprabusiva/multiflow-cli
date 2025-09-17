@@ -23,11 +23,11 @@
     "build:corporate": "bash install-corporate.sh"
   },
   "dependencies": {
-    "commander": "^11.0.0",
+    "commander": "^12.1.0",
     "simple-git": "^3.19.1",
     "yaml": "^2.3.2",
-    "inquirer": "^9.2.10",
-    "chalk": "^4.1.2",
+    "inquirer": "^9.3.8",
+    "chalk": "^5.6.2",
     "@octokit/rest": "^20.1.1"
   },
   "keywords": [
