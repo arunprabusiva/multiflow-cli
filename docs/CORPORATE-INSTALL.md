@@ -54,25 +54,6 @@ node --version  # Should be 16.0.0 or higher
 node multiflow-standalone.js --help
 ```
 
-## 📋 TCS Laptop Specific Instructions
-
-### Method 1: npx (Works 99% of the time)
-```bash
-npx multiflow-cli@latest --version
-npx multiflow-cli@latest init
-```
-
-### Method 2: Request IT Support
-Ask your IT team to:
-- Install Node.js 16+ 
-- Allow npm access to registry.npmjs.org
-- Configure corporate proxy settings
-
-### Method 3: Offline Installation
-1. Download Multimflow on personal laptop
-2. Copy `node_modules` folder to TCS laptop
-3. Run with: `node path/to/multiflow-cli/src/cli.js`
-
 ## 🆘 Troubleshooting
 
 | Error | Solution |
@@ -93,7 +74,7 @@ Ask your IT team to:
 
 - 🐛 **Issues**: [GitHub Issues](https://github.com/arunprabusiva/multiflow-cli/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/arunprabusiva/multiflow-cli/discussions)
-- 📧 **Email**: Include "TCS Corporate" in subject
+- 📧 **Email**: Include "Corporate" in subject
 
 ---
 
