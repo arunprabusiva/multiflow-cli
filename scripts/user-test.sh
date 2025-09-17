@@ -1,8 +1,8 @@
 #!/bin/bash
 
-echo "🌊 MultiFlow CLI - Real User Test"
+echo "🌊 Multimflow CLI - Real User Test"
 echo "================================"
-echo "This script tests MultiFlow as a real user would experience it"
+echo "This script tests Multimflow as a real user would experience it"
 echo ""
 
 # Check prerequisites
@@ -17,15 +17,15 @@ echo "✅ npm: $(npm --version)"
 
 # Install from npm (like a real user)
 echo ""
-echo "📦 Installing MultiFlow CLI from npm..."
+echo "📦 Installing Multimflow CLI from npm..."
 npm install -g multiflow-cli
 
 # Check installation
 echo ""
 echo "🔍 Checking installation..."
-if command -v mflow &> /dev/null; then
+if command -v mmflow &> /dev/null; then
     echo "✅ 'mflow' command is available globally"
-    mflow --version
+    mmflow --version
 else
     echo "⚠️  'mflow' command not found, using npx fallback"
     npx multiflow-cli --version
@@ -76,24 +76,24 @@ echo ""
 echo "🚀 Testing the 30-second getting started experience..."
 
 echo "  Step 1: Initialize MultiFlow..."
-if command -v mflow &> /dev/null; then
-    mflow init
+if command -v mmflow &> /dev/null; then
+    mmflow init
 else
     npx multiflow-cli init
 fi
 
 echo ""
 echo "  Step 2: Create a feature..."
-if command -v mflow &> /dev/null; then
-    mflow feature create user-authentication
+if command -v mmflow &> /dev/null; then
+    mmflow feature create user-authentication
 else
     npx multiflow-cli feature create user-authentication
 fi
 
 echo ""
 echo "  Step 3: Check status..."
-if command -v mflow &> /dev/null; then
-    mflow status user-authentication
+if command -v mmflow &> /dev/null; then
+    mmflow status user-authentication
 else
     npx multiflow-cli status user-authentication
 fi
@@ -104,8 +104,8 @@ echo "📝 Making changes and testing commit..."
 echo "// Added login functionality" >> frontend/app.js
 echo "// Added auth endpoints" >> backend/server.js
 
-if command -v mflow &> /dev/null; then
-    mflow feature commit user-authentication -m "Add user authentication system"
+if command -v mmflow &> /dev/null; then
+    mmflow feature commit user-authentication -m "Add user authentication system"
 else
     npx multiflow-cli feature commit user-authentication -m "Add user authentication system"
 fi
@@ -115,24 +115,24 @@ echo ""
 echo "🧪 Testing essential commands..."
 
 echo "  → Testing doctor command..."
-if command -v mflow &> /dev/null; then
-    mflow doctor
+if command -v mmflow &> /dev/null; then
+    mmflow doctor
 else
     npx multiflow-cli doctor
 fi
 
 echo "  → Testing profile creation..."
-if command -v mflow &> /dev/null; then
-    mflow profile create frontend-team --repos frontend mobile docs
-    mflow profile list
+if command -v mmflow &> /dev/null; then
+    mmflow profile create frontend-team --repos frontend mobile docs
+    mmflow profile list
 else
     npx multiflow-cli profile create frontend-team --repos frontend mobile docs
     npx multiflow-cli profile list
 fi
 
 echo "  → Testing PR URL generation..."
-if command -v mflow &> /dev/null; then
-    mflow pr user-authentication --title "Add user authentication system"
+if command -v mmflow &> /dev/null; then
+    mmflow pr user-authentication --title "Add user authentication system"
 else
     npx multiflow-cli pr user-authentication --title "Add user authentication system"
 fi
@@ -140,8 +140,8 @@ fi
 # Clean up feature
 echo ""
 echo "🧹 Cleaning up feature..."
-if command -v mflow &> /dev/null; then
-    mflow feature cleanup user-authentication
+if command -v mmflow &> /dev/null; then
+    mmflow feature cleanup user-authentication
 else
     npx multiflow-cli feature cleanup user-authentication
 fi
@@ -166,9 +166,9 @@ echo "  ✅ Workspace cleanup"
 
 # Uninstall
 echo ""
-echo "🗑️  Uninstalling MultiFlow CLI..."
+echo "🗑️  Uninstalling Multimflow CLI..."
 npm uninstall -g multiflow-cli
 
 echo ""
-echo "🎉 MultiFlow CLI test completed and uninstalled!"
+echo "🎉 Multimflow CLI test completed and uninstalled!"
 echo "   Ready for real users! 🚀"

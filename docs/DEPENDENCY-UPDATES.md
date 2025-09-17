@@ -1,6 +1,6 @@
 # 📦 Dependency Update Guide
 
-This guide explains how to safely update MultiFlow CLI dependencies.
+This guide explains how to safely update Multimflow CLI dependencies.
 
 ## 🚨 Why Manual Updates?
 

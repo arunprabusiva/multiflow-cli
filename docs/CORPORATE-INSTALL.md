@@ -1,4 +1,4 @@
-# 🏢 MultiFlow for Corporate Environments
+# 🏢 Multimflow for Corporate Environments
 
 > **Working with corporate laptops? No admin rights? Firewall restrictions? We've got you covered!**
 
@@ -69,7 +69,7 @@ Ask your IT team to:
 - Configure corporate proxy settings
 
 ### Method 3: Offline Installation
-1. Download MultiFlow on personal laptop
+1. Download Multimflow on personal laptop
 2. Copy `node_modules` folder to TCS laptop
 3. Run with: `node path/to/multiflow-cli/src/cli.js`
 
@@ -97,4 +97,4 @@ Ask your IT team to:
 
 ---
 
-**✅ MultiFlow works in corporate environments - choose the method that works for your restrictions!**
+**✅ Multimflow works in corporate environments - choose the method that works for your restrictions!**

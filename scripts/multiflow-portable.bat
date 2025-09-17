@@ -1,5 +1,5 @@
 @echo off
-REM MultiFlow Portable - Windows Corporate Version
+REM Multimflow Portable - Windows Corporate Version
 REM Usage: multiflow-portable.bat --help
 REM No installation required - just download and run
 

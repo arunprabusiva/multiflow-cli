@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🧪 MultiFlow v2.0 Comprehensive Test Suite"
+echo "🧪 Multimflow v2.0 Comprehensive Test Suite"
 echo "=========================================="
 echo ""
 
@@ -41,7 +41,7 @@ echo ""
 # Clean up any existing config
 rm -f .flow.yml
 
-echo "📋 Running MultiFlow Test Suite..."
+echo "📋 Running Multimflow Test Suite..."
 echo ""
 
 # 1. Core Functionality Tests
@@ -98,7 +98,7 @@ echo -e "Total Tests: $((TESTS_PASSED + TESTS_FAILED))"
 
 if [ $TESTS_FAILED -eq 0 ]; then
     echo ""
-    echo -e "${GREEN}🎉 ALL TESTS PASSED! MultiFlow v2.0 is ready for production!${NC}"
+    echo -e "${GREEN}🎉 ALL TESTS PASSED! Multimflow v2.0 is ready for production!${NC}"
     echo ""
     echo "✅ Core functionality working"
     echo "✅ Profile management complete"
@@ -112,4 +112,4 @@ else
 fi
 
 echo ""
-echo "🚀 MultiFlow v2.0 Comprehensive Test Complete!"
+echo "🚀 Multimflow v2.0 Comprehensive Test Complete!"

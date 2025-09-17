@@ -2,94 +2,94 @@
 
 ## Core Commands
 
-### `flow init`
+### `mflow init`
 Initialize workspace and scan for repositories.
 
 ```bash
-flow init                    # Basic initialization
-flow init --create-missing   # Auto-create GitHub repos for local folders
+mflow init                    # Basic initialization
+mflow init --create-missing   # Auto-create GitHub repos for local folders
 ```
 
-### `flow feature`
+### `mflow feature`
 Manage features across repositories.
 
 ```bash
-flow feature create <name>              # Create feature branch everywhere
-flow feature create <name> --repos frontend,backend  # Target specific repos
-flow feature create <name> --dry-run    # Preview without executing
-flow feature create <name> --stash      # Auto-stash uncommitted changes
+mflow feature create <name>              # Create feature branch everywhere
+mflow feature create <name> --repos frontend,backend  # Target specific repos
+mflow feature create <name> --dry-run    # Preview without executing
+mflow feature create <name> --stash      # Auto-stash uncommitted changes
 
-flow feature commit <name> -m "msg"     # Commit changes across repos
-flow feature commit <name> -m "msg" --repos backend  # Commit specific repos
-flow feature commit <name> -m "msg" --dry-run        # Preview commits
+mflow feature commit <name> -m "msg"     # Commit changes across repos
+mflow feature commit <name> -m "msg" --repos backend  # Commit specific repos
+mflow feature commit <name> -m "msg" --dry-run        # Preview commits
 
-flow feature publish <name>             # Push branches to remotes
-flow feature merge <name>               # Check merge readiness
-flow feature cleanup <name>             # Delete feature branches
-flow feature cleanup <name> --repos frontend --dry-run  # Preview cleanup
+mflow feature publish <name>             # Push branches to remotes
+mflow feature merge <name>               # Check merge readiness
+mflow feature cleanup <name>             # Delete feature branches
+mflow feature cleanup <name> --repos frontend --dry-run  # Preview cleanup
 ```
 
-### `flow status`
+### `mflow status`
 Show feature status across repositories.
 
 ```bash
-flow status <name>           # Basic status
-flow status <name> --detailed # Detailed with commit counts
+mflow status <name>           # Basic status
+mflow status <name> --detailed # Detailed with commit counts
 ```
 
 ## Utility Commands
 
-### `flow checkout`
+### `mflow checkout`
 Switch branches across all repositories.
 
 ```bash
-flow checkout main           # Switch all repos to main
-flow checkout feature-name   # Switch to feature branch
+mflow checkout main           # Switch all repos to main
+mflow checkout feature-name   # Switch to feature branch
 ```
 
-### `flow diff`
+### `mflow diff`
 Show changes across repositories.
 
 ```bash
-flow diff <feature>          # Show changed files
-flow diff <feature> --summary # Show change statistics
+mflow diff <feature>          # Show changed files
+mflow diff <feature> --summary # Show change statistics
 ```
 
-### `flow doctor`
+### `mflow doctor`
 Check workspace health.
 
 ```bash
-flow doctor                  # Health check all repositories
+mflow doctor                  # Health check all repositories
 ```
 
 ## Configuration
 
-### `flow config`
+### `mflow config`
 Manage workspace configuration.
 
 ```bash
-flow config show                              # Show current config
-flow config ignore <repo>                    # Ignore repository
-flow config unignore <repo>                  # Stop ignoring repository
+mflow config show                              # Show current config
+mflow config ignore <repo>                    # Ignore repository
+mflow config unignore <repo>                  # Stop ignoring repository
 ```
 
 ## GitHub Integration
 
-### `flow auth`
+### `mflow auth`
 GitHub authentication.
 
 ```bash
-flow auth login              # Browser-based OAuth login
-flow auth token <token>      # Login with personal access token
-flow auth status             # Show authentication status
-flow auth logout             # Logout
+mflow auth login              # Browser-based OAuth login
+mflow auth token <token>      # Login with personal access token
+mflow auth status             # Show authentication status
+mflow auth logout             # Logout
 ```
 
-### `flow repo`
+### `mflow repo`
 Repository management.
 
 ```bash
-flow repo create <name>              # Create GitHub repository
-flow repo create <name> --private    # Create private repository
-flow repo link <name>                # Link local repo to GitHub
+mflow repo create <name>              # Create GitHub repository
+mflow repo create <name> --private    # Create private repository
+mflow repo link <name>                # Link local repo to GitHub
 ```

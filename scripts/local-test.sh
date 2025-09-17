@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🌊 MultiFlow CLI - Local Version Test"
+echo "🌊 Multimflow CLI - Local Version Test"
 echo "===================================="
 echo "Testing local version without npm install"
 echo ""
@@ -56,7 +56,7 @@ done
 
 # Test using local CLI
 echo ""
-echo "🚀 Testing local MultiFlow CLI..."
+echo "🚀 Testing local Multimflow CLI..."
 FLOW_CMD="node ../src/cli.js"
 
 echo "  → Testing version..."
@@ -100,4 +100,4 @@ rm -rf $TEST_DIR
 
 echo ""
 echo "✅ Local test completed successfully!"
-echo "🎉 MultiFlow v2.0.2 is ready for publishing!"
+echo "🎉 Multimflow v2.0.2 is ready for publishing!"

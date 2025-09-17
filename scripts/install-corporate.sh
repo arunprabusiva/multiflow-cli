@@ -1,8 +1,8 @@
 #!/bin/bash
 
-echo "🏢 MultiFlow Corporate Installation"
+echo "🏢 Multimflow Corporate Installation"
 echo "=================================="
-echo "Installing MultiFlow for corporate environments with restrictions"
+echo "Installing Multimflow for corporate environments with restrictions"
 echo ""
 
 # Check if we have Node.js
@@ -18,7 +18,7 @@ echo "✅ Node.js: $(node --version)"
 MULTIFLOW_DIR="$HOME/.multiflow"
 mkdir -p "$MULTIFLOW_DIR"
 
-echo "📦 Installing MultiFlow locally (no admin rights needed)..."
+echo "📦 Installing Multimflow locally (no admin rights needed)..."
 
 # Try different installation methods
 if npm install multiflow-cli --prefix "$MULTIFLOW_DIR" 2>/dev/null; then
@@ -51,11 +51,11 @@ if [[ ":$PATH:" != *":$MULTIFLOW_DIR:"* ]]; then
 fi
 
 echo ""
-echo "✅ MultiFlow installed successfully!"
+echo "✅ Multimflow installed successfully!"
 echo ""
 echo "📋 Usage:"
-echo "   $MULTIFLOW_DIR/mflow --help"
-echo "   $MULTIFLOW_DIR/mflow init"
+echo "   $MULTIFLOW_DIR/mmflow --help"
+echo "   $MULTIFLOW_DIR/mmflow init"
 echo ""
 echo "🔄 Restart your terminal or run: source ~/.bashrc"
-echo "   Then you can use: mflow --help"
+echo "   Then you can use: mmflow --help"

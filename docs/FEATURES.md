@@ -1,4 +1,4 @@
-# 🌊 MultiFlow Features Documentation
+# 🌊 Multimflow Features Documentation
 
 ## 🎯 Core Features
 
@@ -11,12 +11,12 @@
 ### 2. **Profile-Based Workflows**
 ```bash
 # Create profiles for different development scenarios
-flow profile create frontend --repos frontend shared-components
-flow profile create backend --repos backend database api
-flow profile create fullstack --repos frontend backend mobile
+mflow profile create frontend --repos frontend shared-components
+mflow profile create backend --repos backend database api
+mflow profile create fullstack --repos frontend backend mobile
 
 # Switch between workflows
-flow profile switch frontend
+mflow profile switch frontend
 # Now all operations only affect frontend repositories
 ```
 
@@ -29,40 +29,40 @@ flow profile switch frontend
 ### 3. **Feature Branch Management**
 ```bash
 # Create feature branches across active repositories
-flow feature create user-authentication
+mflow feature create user-authentication
 
 # Commit changes across repositories with changes
-flow feature commit user-authentication -m "Add JWT authentication"
+mflow feature commit user-authentication -m "Add JWT authentication"
 
 # Publish branches to remotes
-flow feature publish user-authentication
+mflow feature publish user-authentication
 
 # Check merge readiness and conflicts
-flow feature merge user-authentication
+mflow feature merge user-authentication
 
 # Clean up when done
-flow feature cleanup user-authentication
+mflow feature cleanup user-authentication
 ```
 
 ### 4. **Git Operations**
 ```bash
 # Synchronize all repositories
-flow pull    # Pull latest changes from all remotes
-flow push    # Push local changes to all remotes
+mflow pull    # Pull latest changes from all remotes
+mflow push    # Push local changes to all remotes
 
 # Branch management
-flow checkout main              # Switch all repos to main branch
-flow checkout feature/new-ui    # Switch all repos to feature branch
+mflow checkout main              # Switch all repos to main branch
+mflow checkout feature/new-ui    # Switch all repos to feature branch
 
 # View changes
-flow diff payment-system        # Show cross-repository changes
-flow diff payment-system --summary  # Summary view only
+mflow diff payment-system        # Show cross-repository changes
+mflow diff payment-system --summary  # Summary view only
 ```
 
 ### 5. **Pull Request Automation**
 ```bash
 # Generate PR URLs for all repositories with changes
-flow pr payment-system --title "Add Stripe integration" --body "Implements payment processing"
+mflow pr payment-system --title "Add Stripe integration" --body "Implements payment processing"
 ```
 
 **Output:**
@@ -74,7 +74,7 @@ flow pr payment-system --title "Add Stripe integration" --body "Implements payme
 
 ### 6. **Workspace Diagnostics**
 ```bash
-flow doctor
+mflow doctor
 ```
 
 **Checks:**
@@ -94,45 +94,45 @@ flow doctor
 ### Profile Management (CRUD)
 ```bash
 # Create profiles
-flow profile create <name> --repos <repo1> <repo2>
+mflow profile create <name> --repos <repo1> <repo2>
 
 # List all profiles with active indicator
-flow profile list
+mflow profile list
 
 # Show detailed profile information
-flow profile show <name>
+mflow profile show <name>
 
 # Switch active profile
-flow profile switch <name>
+mflow profile switch <name>
 
 # Delete profile (with confirmation)
-flow profile delete <name>
+mflow profile delete <name>
 ```
 
 ### Configuration Management
 ```bash
 # Show current workspace configuration
-flow config show
+mflow config show
 
 # Set default branch for specific repository
-flow config set-default-branch frontend main
+mflow config set-default-branch frontend main
 ```
 
 ### Status and Monitoring
 ```bash
 # Show feature status across repositories
-flow status <feature-name>
+mflow status <feature-name>
 
 # Check workspace health
-flow doctor
+mflow doctor
 
-# Show MultiFlow information
-flow about
+# Show Multimflow information
+mflow about
 ```
 
 ## 📊 Configuration Structure
 
-MultiFlow uses a `.flow.yml` file to store workspace configuration:
+Multimflow uses a `.multiflow.yml` file to store workspace configuration:
 
 ```yaml
 # Repository definitions
@@ -172,53 +172,53 @@ features:
 ### 1. **Frontend Developer Workflow**
 ```bash
 # Setup
-flow profile create frontend --repos frontend shared-components
-flow profile switch frontend
+mflow profile create frontend --repos frontend shared-components
+mflow profile switch frontend
 
 # Development
-flow feature create user-interface
+mflow feature create user-interface
 # Make changes in frontend repositories
-flow feature commit user-interface -m "Update UI components"
-flow pr user-interface --title "New user interface"
+mflow feature commit user-interface -m "Update UI components"
+mflow pr user-interface --title "New user interface"
 ```
 
 ### 2. **Backend Developer Workflow**
 ```bash
 # Setup  
-flow profile create backend --repos backend database
-flow profile switch backend
+mflow profile create backend --repos backend database
+mflow profile switch backend
 
 # Development
-flow feature create api-endpoints
+mflow feature create api-endpoints
 # Make changes in backend repositories
-flow feature commit api-endpoints -m "Add new API endpoints"
-flow pr api-endpoints --title "New API endpoints"
+mflow feature commit api-endpoints -m "Add new API endpoints"
+mflow pr api-endpoints --title "New API endpoints"
 ```
 
 ### 3. **Full-Stack Feature Development**
 ```bash
 # Setup
-flow profile switch fullstack
+mflow profile switch fullstack
 
 # Development
-flow feature create payment-integration
+mflow feature create payment-integration
 # Make changes across all repositories
-flow feature commit payment-integration -m "Add payment processing"
-flow pr payment-integration --title "Payment integration"
+mflow feature commit payment-integration -m "Add payment processing"
+mflow pr payment-integration --title "Payment integration"
 ```
 
 ### 4. **Team Coordination**
 ```bash
 # Pull latest changes across all repositories
-flow pull
+mflow pull
 
 # Check workspace health before starting work
-flow doctor
+mflow doctor
 
 # Create feature affecting specific repositories
-flow profile create payment-team --repos frontend backend payment-service
-flow profile switch payment-team
-flow feature create stripe-integration
+mflow profile create payment-team --repos frontend backend payment-service
+mflow profile switch payment-team
+mflow feature create stripe-integration
 ```
 
 ## 🛡️ Safety Features
@@ -289,4 +289,4 @@ flow feature create stripe-integration
 
 ---
 
-**MultiFlow transforms multi-repository development from chaos to orchestrated harmony.** 🎼
+**Multimflow transforms multi-repository development from chaos to orchestrated harmony.** 🎼

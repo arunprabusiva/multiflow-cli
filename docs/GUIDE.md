@@ -1,4 +1,4 @@
-# MultiFlow Complete Guide
+# Multimflow Complete Guide
 
 ## Installation
 
@@ -8,7 +8,7 @@ npm install -g multiflow-cli
 
 ## Workspace Setup
 
-MultiFlow works with any directory containing multiple Git repositories:
+Multimflow works with any directory containing multiple Git repositories:
 
 ```
 workspace/
@@ -22,7 +22,7 @@ Initialize your workspace:
 
 ```bash
 cd workspace
-flow init
+mflow init
 ```
 
 This creates a `.multiflow.yml` configuration file tracking your repositories.
@@ -31,7 +31,7 @@ This creates a `.multiflow.yml` configuration file tracking your repositories.
 
 ### 1. Create Feature
 ```bash
-flow feature create payment-system
+mflow feature create payment-system
 ```
 Creates `feature/payment-system` branch in all repositories.
 
@@ -40,25 +40,25 @@ Make changes in any repositories as needed.
 
 ### 3. Commit
 ```bash
-flow feature commit payment-system -m "Add payment integration"
+mflow feature commit payment-system -m "Add payment integration"
 ```
 Commits changes in repositories that have modifications.
 
 ### 4. Check Status
 ```bash
-flow status payment-system
+mflow status payment-system
 ```
 Shows which repositories have the feature branch and their status.
 
 ### 5. Publish (Optional)
 ```bash
-flow feature publish payment-system
+mflow feature publish payment-system
 ```
 Pushes feature branches to remote repositories.
 
 ### 6. Cleanup
 ```bash
-flow feature cleanup payment-system
+mflow feature cleanup payment-system
 ```
 Removes feature branches from all repositories.
 
@@ -66,7 +66,7 @@ Removes feature branches from all repositories.
 
 ### Health Checking
 ```bash
-flow doctor
+mflow doctor
 ```
 Checks for:
 - Uncommitted changes
@@ -75,19 +75,19 @@ Checks for:
 
 ### Branch Management
 ```bash
-flow checkout main           # Switch all repos to main
-flow checkout develop        # Switch all repos to develop
+mflow checkout main           # Switch all repos to main
+mflow checkout develop        # Switch all repos to develop
 ```
 
 ### Change Analysis
 ```bash
-flow diff payment-system     # Show changed files
-flow diff payment-system -s  # Show change summary
+mflow diff payment-system     # Show changed files
+mflow diff payment-system -s  # Show change summary
 ```
 
 ## Configuration
 
-MultiFlow creates `.multiflow.yml` in your workspace:
+Multimflow creates `.multiflow.yml` in your workspace:
 
 ```yaml
 repos:
@@ -116,7 +116,7 @@ workspace:
 Create `.multiflowignore` to exclude repositories:
 
 ```
-# MultiFlow ignore file
+# Multimflow ignore file
 # Add repository names (one per line) to exclude from operations
 
 docs
@@ -126,8 +126,8 @@ old-prototype
 
 Or use commands:
 ```bash
-flow config ignore docs        # Add to ignore list
-flow config unignore docs      # Remove from ignore list
+mflow config ignore docs        # Add to ignore list
+mflow config unignore docs      # Remove from ignore list
 ```
 
 ## Best Practices

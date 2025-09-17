@@ -8,13 +8,13 @@ Target specific repositories instead of all repos in your workspace.
 
 ```bash
 # Create feature only in frontend and backend
-flow feature create payment --repos frontend,backend
+mflow feature create payment --repos frontend,backend
 
 # Commit changes only in backend
-flow feature commit payment -m "Update API" --repos backend
+mflow feature commit payment -m "Update API" --repos backend
 
 # Cleanup only frontend branch
-flow feature cleanup payment --repos frontend
+mflow feature cleanup payment --repos frontend
 ```
 
 ### Use Cases
@@ -24,24 +24,24 @@ flow feature cleanup payment --repos frontend
 
 ## Dry Run Mode
 
-Preview what MultiFlow would do without actually executing commands.
+Preview what Multimflow would do without actually executing commands.
 
 ### Examples
 
 ```bash
 # See which repos would get the feature branch
-flow feature create payment --dry-run
+mflow feature create payment --dry-run
 
 # Preview what would be committed
-flow feature commit payment -m "Update" --dry-run
+mflow feature commit payment -m "Update" --dry-run
 
 # Check what would be cleaned up
-flow feature cleanup payment --dry-run
+mflow feature cleanup payment --dry-run
 ```
 
 ### Output Example
 ```bash
-$ flow feature create payment --dry-run
+$ mflow feature create payment --dry-run
 
 🔍 Dry run - would create feature branch:
   • frontend: feature/payment
@@ -57,9 +57,9 @@ Automatically stash uncommitted changes when creating feature branches.
 
 ```bash
 # Stash changes before creating feature
-flow feature create payment --stash
+mflow feature create payment --stash
 
-# MultiFlow will:
+# Multimflow will:
 # 1. Stash uncommitted changes in each repo
 # 2. Create the feature branch
 # 3. Leave stashes for you to apply later
@@ -77,11 +77,11 @@ git stash pop
 
 ## Smart Error Handling
 
-MultiFlow handles partial failures gracefully and gives you options.
+Multimflow handles partial failures gracefully and gives you options.
 
 ### Partial Success Example
 ```bash
-$ flow feature create payment
+$ mflow feature create payment
 
 ✅ frontend: Created feature/payment
 ✅ backend: Created feature/payment
@@ -93,7 +93,7 @@ $ flow feature create payment
 
 ### Branch Existence Check
 ```bash
-$ flow feature create payment
+$ mflow feature create payment
 
 ❌ Error: Branch 'feature/payment' already exists in: frontend, backend
 💡 Tip: Use different name or cleanup existing branches first
@@ -101,11 +101,11 @@ $ flow feature create payment
 
 ## Repository Ignoring
 
-Exclude repositories from MultiFlow operations.
+Exclude repositories from Multimflow operations.
 
 ### .multiflowignore File
 ```
-# MultiFlow ignore file
+# Multimflow ignore file
 # Add repository names (one per line)
 
 docs
@@ -117,13 +117,13 @@ temp-experiments
 ### Commands
 ```bash
 # Add to ignore list
-flow config ignore docs
+mflow config ignore docs
 
 # Remove from ignore list  
-flow config unignore docs
+mflow config unignore docs
 
 # View current configuration
-flow config show
+mflow config show
 ```
 
 ### Ignore Patterns
@@ -139,13 +139,13 @@ Advanced features work together for powerful workflows.
 ### Example: Careful Feature Creation
 ```bash
 # Create feature with all safety features
-flow feature create payment \
+mflow feature create payment \
   --repos frontend,backend \
   --stash \
   --dry-run
 
 # Review the plan, then execute without --dry-run
-flow feature create payment \
+mflow feature create payment \
   --repos frontend,backend \
   --stash
 ```
@@ -153,10 +153,10 @@ flow feature create payment \
 ### Example: Selective Cleanup
 ```bash
 # Cleanup only completed repos
-flow feature cleanup payment --repos frontend
+mflow feature cleanup payment --repos frontend
 
 # Keep working on backend
-flow status payment
+mflow status payment
 # ├─ backend: feature/payment ✅ ready
 ```
 

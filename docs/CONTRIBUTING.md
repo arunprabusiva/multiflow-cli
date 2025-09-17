@@ -27,7 +27,7 @@ Thank you for your interest in contributing to MultiFlow! This document provides
 ## 🐛 Reporting Issues
 
 When reporting issues, please include:
-- MultiFlow version (`flow --version`)
+- Multimflow version (`mflow --version`)
 - Operating system
 - Node.js version (`node --version`)
 - Git version (`git --version`)
@@ -133,8 +133,8 @@ multiflow/
 ## 🧪 Testing Your Changes
 
 ### Manual Testing Checklist
-- [ ] `flow init` works in empty directory
-- [ ] `flow init` works with existing repos
+- [ ] `mflow init` works in empty directory
+- [ ] `mflow init` works with existing repos
 - [ ] Feature creation works across all repos
 - [ ] Commit works with staged changes
 - [ ] Status shows correct information

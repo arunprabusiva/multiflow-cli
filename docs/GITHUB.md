@@ -1,6 +1,6 @@
 # GitHub Integration
 
-MultiFlow can automatically create and manage GitHub repositories.
+Multimflow can automatically create and manage GitHub repositories.
 
 ## Authentication
 
@@ -10,12 +10,12 @@ MultiFlow can automatically create and manage GitHub repositories.
 3. Login with MultiFlow:
 
 ```bash
-flow auth token ghp_your_token_here
+mflow auth token ghp_your_token_here
 ```
 
 ### Option 2: Browser Login (Future)
 ```bash
-flow auth login  # Opens browser for OAuth (requires setup)
+mflow auth login  # Opens browser for OAuth (requires setup)
 ```
 
 ## Auto-Create Repositories
@@ -23,10 +23,10 @@ flow auth login  # Opens browser for OAuth (requires setup)
 When initializing a workspace with local repositories that don't have GitHub remotes:
 
 ```bash
-flow init --create-missing
+mflow init --create-missing
 ```
 
-MultiFlow will:
+Multimflow will:
 1. Detect local repositories without remotes
 2. Ask if you want to create GitHub repositories
 3. Let you choose public/private for new repositories
@@ -35,33 +35,33 @@ MultiFlow will:
 ## Manual Repository Creation
 
 ```bash
-flow repo create my-new-repo              # Create public repository
-flow repo create my-private-repo --private # Create private repository
+mflow repo create my-new-repo              # Create public repository
+mflow repo create my-private-repo --private # Create private repository
 ```
 
 ## Link Existing Repository
 
 ```bash
-flow repo link frontend                    # Auto-detect and link
-flow repo link backend https://github.com/user/backend.git  # Manual URL
+mflow repo link frontend                    # Auto-detect and link
+mflow repo link backend https://github.com/user/backend.git  # Manual URL
 ```
 
 ## Authentication Status
 
 ```bash
-flow auth status    # Check if authenticated
-flow auth logout    # Remove stored credentials
+mflow auth status    # Check if authenticated
+mflow auth logout    # Remove stored credentials
 ```
 
 ## Troubleshooting
 
 **"Not authenticated" error:**
-- Run `flow auth token <your-token>`
+- Run `mflow auth token <your-token>`
 - Ensure token has `repo` scope
 
 **"Repository already exists" error:**
 - Repository name conflicts with existing GitHub repo
-- Use `flow repo link` instead of create
+- Use `mflow repo link` instead of create
 
 **Permission denied:**
 - Check token permissions

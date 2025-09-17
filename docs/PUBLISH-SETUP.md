@@ -1,6 +1,6 @@
 # 🚀 Publishing Setup Guide
 
-This guide explains how to set up automated publishing for MultiFlow CLI.
+This guide explains how to set up automated publishing for Multimflow CLI.
 
 ## 📋 Prerequisites
 
@@ -55,7 +55,7 @@ This guide explains how to set up automated publishing for MultiFlow CLI.
 **Always run a dry run first:**
 
 1. Set **Dry run** to `true`
-2. Check the workflow output
+2. Check the workmflow output
 3. Verify package contents
 4. If everything looks good, run with **Dry run** set to `false`
 
@@ -77,7 +77,7 @@ After publishing, verify:
 3. **Installation test**:
    ```bash
    npm install -g multiflow-cli@latest
-   mflow --version
+   mmflow --version
    ```
 
 ## 🚨 Troubleshooting
@@ -114,4 +114,4 @@ If you encounter issues:
 
 ---
 
-**✅ Ready to publish? Run the workflow with dry run first!**
+**✅ Ready to publish? Run the workmflow with dry run first!**

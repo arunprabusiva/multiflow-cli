@@ -1,5 +1,5 @@
 @echo off
-echo 🧪 MultiFlow Comprehensive Local Test
+echo 🧪 Multimflow Comprehensive Local Test
 echo =====================================
 
 REM Create test workspace
@@ -51,9 +51,9 @@ cd ..
 echo.
 echo ✅ Created 4 test repositories
 
-REM Test MultiFlow commands
+REM Test Multimflow commands
 echo.
-echo 🌊 Testing MultiFlow Commands...
+echo 🌊 Testing Multimflow Commands...
 echo.
 
 echo 1. Initialize workspace
