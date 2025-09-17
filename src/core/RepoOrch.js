@@ -17,7 +17,7 @@ class RepoOrch {
       const content = await fs.readFile(this.configPath, 'utf8');
       this.config = YAML.parse(content);
     } catch (error) {
-      this.config = { repos: {}, features: {} };
+      this.config = { repos: {}, features: {}, profiles: {}, settings: { activeProfile: 'default' } };
     }
   }
 
@@ -105,8 +105,9 @@ class RepoOrch {
   async createFeature(featureName) {
     await this.loadConfig();
     const branchName = `feature/${featureName}`;
+    const activeRepos = this.getActiveRepos();
     
-    for (const [repoName, repoInfo] of Object.entries(this.config.repos)) {
+    for (const [repoName, repoInfo] of Object.entries(activeRepos)) {
       const git = simpleGit(repoInfo.path);
       
       try {
@@ -122,7 +123,7 @@ class RepoOrch {
     
     this.config.features[featureName] = {
       branch: branchName,
-      repos: Object.keys(this.config.repos),
+      repos: Object.keys(activeRepos),
       created: new Date().toISOString()
     };
     
@@ -362,9 +363,10 @@ class RepoOrch {
     console.log('========================\n');
     
     let healthyRepos = 0;
-    let totalRepos = Object.keys(this.config.repos).length;
+    const activeRepos = this.getActiveRepos();
+    let totalRepos = Object.keys(activeRepos).length;
     
-    for (const [repoName, repoInfo] of Object.entries(this.config.repos)) {
+    for (const [repoName, repoInfo] of Object.entries(activeRepos)) {
       const git = simpleGit(repoInfo.path);
       
       try {
@@ -386,6 +388,159 @@ class RepoOrch {
     } else {
       console.log(chalk.yellow('⚠️  Some repositories need attention'));
     }
+  }
+
+  getActiveRepos() {
+    const activeProfile = this.config.settings?.activeProfile || 'default';
+    const profile = this.config.profiles?.[activeProfile];
+    
+    if (!profile || !profile.repos) {
+      return this.config.repos;
+    }
+    
+    const activeRepos = {};
+    for (const repoName of profile.repos) {
+      if (this.config.repos[repoName]) {
+        activeRepos[repoName] = this.config.repos[repoName];
+      }
+    }
+    return activeRepos;
+  }
+
+  async createProfile(profileName, repoNames = []) {
+    await this.loadConfig();
+    
+    this.config.profiles = this.config.profiles || {};
+    this.config.profiles[profileName] = {
+      repos: repoNames.length > 0 ? repoNames : Object.keys(this.config.repos),
+      created: new Date().toISOString()
+    };
+    
+    await this.saveConfig();
+    console.log(`✅ Profile '${profileName}' created with ${this.config.profiles[profileName].repos.length} repositories`);
+  }
+
+  async switchProfile(profileName) {
+    await this.loadConfig();
+    
+    if (!this.config.profiles?.[profileName]) {
+      throw new Error(`Profile '${profileName}' not found`);
+    }
+    
+    this.config.settings = this.config.settings || {};
+    this.config.settings.activeProfile = profileName;
+    
+    await this.saveConfig();
+    console.log(`✅ Switched to profile '${profileName}'`);
+  }
+
+  async pullAll() {
+    await this.loadConfig();
+    const activeRepos = this.getActiveRepos();
+    
+    for (const [repoName, repoInfo] of Object.entries(activeRepos)) {
+      if (!repoInfo.hasRemote) {
+        console.log(`⚪ ${repoName}: No remote configured`);
+        continue;
+      }
+      
+      const git = simpleGit(repoInfo.path);
+      
+      try {
+        await git.pull();
+        console.log(`✅ ${repoName}: Pulled latest changes`);
+      } catch (error) {
+        console.log(`⚠️  ${repoName}: ${error.message}`);
+      }
+    }
+  }
+
+  async pushAll() {
+    await this.loadConfig();
+    const activeRepos = this.getActiveRepos();
+    
+    for (const [repoName, repoInfo] of Object.entries(activeRepos)) {
+      if (!repoInfo.hasRemote) {
+        console.log(`⚪ ${repoName}: No remote configured`);
+        continue;
+      }
+      
+      const git = simpleGit(repoInfo.path);
+      
+      try {
+        const status = await git.status();
+        if (status.ahead > 0) {
+          await git.push();
+          console.log(`✅ ${repoName}: Pushed ${status.ahead} commits`);
+        } else {
+          console.log(`⚪ ${repoName}: Nothing to push`);
+        }
+      } catch (error) {
+        console.log(`⚠️  ${repoName}: ${error.message}`);
+      }
+    }
+  }
+
+  async createPRs(featureName, title, body = '') {
+    await this.loadConfig();
+    const feature = this.config.features[featureName];
+    
+    if (!feature) {
+      throw new Error(`Feature '${featureName}' not found`);
+    }
+    
+    console.log(chalk.bold(`\n🔀 Creating Pull Requests for '${featureName}'`));
+    console.log('===============================================\n');
+    
+    for (const repoName of feature.repos) {
+      const repoInfo = this.config.repos[repoName];
+      
+      if (!repoInfo.hasRemote) {
+        console.log(`⚪ ${repoName}: No remote configured`);
+        continue;
+      }
+      
+      const defaultBranch = repoInfo.defaultBranch || 'main';
+      const git = simpleGit(repoInfo.path);
+      
+      try {
+        // Check if there are changes
+        const changedFiles = await ConflictDetector.getChangedFiles(repoInfo.path, feature.branch, defaultBranch);
+        if (changedFiles.length === 0) {
+          console.log(`⚪ ${repoName}: No changes to create PR`);
+          continue;
+        }
+        
+        // Get remote URL for PR creation instructions
+        const remotes = await git.getRemotes(true);
+        const originUrl = remotes.find(r => r.name === 'origin')?.refs?.fetch;
+        
+        if (originUrl) {
+          const prUrl = this.generatePRUrl(originUrl, feature.branch, defaultBranch, title, body);
+          console.log(`🔗 ${repoName}: Create PR at:`);
+          console.log(`   ${prUrl}`);
+        } else {
+          console.log(`⚠️  ${repoName}: Could not determine remote URL`);
+        }
+      } catch (error) {
+        console.log(`❌ ${repoName}: Error - ${error.message}`);
+      }
+    }
+  }
+
+  generatePRUrl(remoteUrl, sourceBranch, targetBranch, title, body) {
+    // Convert SSH/HTTPS URLs to web URLs
+    let webUrl = remoteUrl
+      .replace(/^git@github\.com:/, 'https://github.com/')
+      .replace(/\.git$/, '');
+    
+    const params = new URLSearchParams({
+      expand: '1',
+      title: title,
+      body: body
+    });
+    
+    return `${webUrl}/compare/${targetBranch}...${sourceBranch}?${params.toString()}`;
   }
 }
 
