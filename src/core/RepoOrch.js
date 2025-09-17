@@ -610,6 +610,25 @@ class RepoOrch {
       throw new Error(`Cannot delete active profile '${profileName}'. Switch to another profile first.`);
     }
     
+    const profile = this.config.profiles[profileName];
+    console.log(`\nProfile '${profileName}' contains ${profile.repos.length} repositories:`);
+    console.log(`${profile.repos.join(', ')}\n`);
+    
+    const inquirer = require('inquirer');
+    const { confirm } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'confirm',
+        message: `Are you sure you want to delete profile '${profileName}'?`,
+        default: false
+      }
+    ]);
+    
+    if (!confirm) {
+      console.log('⚪ Profile deletion cancelled');
+      return;
+    }
+    
     delete this.config.profiles[profileName];
     await this.saveConfig();
     
