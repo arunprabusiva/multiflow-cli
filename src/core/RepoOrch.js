@@ -4,12 +4,13 @@ const simpleGit = require('simple-git');
 const YAML = require('yaml');
 const chalk = require('chalk');
 const ConflictDetector = require('./ConflictDetector');
+const GitHubAuth = require('./GitHubAuth');
 
 class RepoOrch {
   constructor() {
     this.configPath = '.flow.yml';
     this.config = null;
-    this.github = null; // GitHub integration disabled for now
+    this.githubAuth = new GitHubAuth();
   }
 
   async loadConfig() {
@@ -633,6 +634,44 @@ class RepoOrch {
     await this.saveConfig();
     
     console.log(`✅ Profile '${profileName}' deleted`);
+  }
+
+  // GitHub Authentication Methods
+  async githubLogin() {
+    try {
+      await this.githubAuth.login();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async githubLoginWithToken(token) {
+    try {
+      const result = await this.githubAuth.loginWithToken(token);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async githubLogout() {
+    try {
+      await this.githubAuth.logout();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async githubAuthStatus() {
+    try {
+      const user = await this.githubAuth.getAuthenticatedUser();
+      console.log(chalk.green(`✅ Authenticated as ${user.name || user.login}`));
+      console.log(chalk.gray(`   Email: ${user.email || 'Not public'}`));
+      console.log(chalk.gray(`   Profile: ${user.html_url}`));
+    } catch (error) {
+      console.log(chalk.yellow('⚠️  Not authenticated'));
+      console.log(chalk.gray('   Run: flow auth token <your-token>'));
+    }
   }
 }
 

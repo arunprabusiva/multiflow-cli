@@ -3,10 +3,28 @@ name: Publish to npm
 on:
   workflow_dispatch:
     inputs:
-      publish:
-        description: 'Publish to npm'
+      version_type:
+        description: 'Version bump type'
         required: true
-        default: 'true'
+        default: 'patch'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+      npm_tag:
+        description: 'npm tag (latest, beta, alpha)'
+        required: true
+        default: 'latest'
+        type: choice
+        options:
+        - latest
+        - beta
+        - alpha
+      dry_run:
+        description: 'Dry run (test without publishing)'
+        required: true
+        default: false
         type: boolean
 
 jobs:
@@ -28,23 +46,64 @@ jobs:
         cache: 'npm'
         
     - name: Install dependencies
-      run: npm ci
+      run: npm ci || npm install
       
     - name: Run tests
       run: npm test
       
-    - name: Get version
+    - name: Verify npm authentication
       run: |
-        VERSION=$(node -p "require('./package.json').version")
-        echo "VERSION=v$VERSION" >> $GITHUB_ENV
-        echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
-        
-    - name: Publish to npm
-      run: npm publish --access public
+        if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
+          echo "❌ NPM_TOKEN secret not found!"
+          echo "Please add your npm token to GitHub Secrets:"
+          echo "1. Go to https://www.npmjs.com/settings/tokens"
+          echo "2. Create a new token with 'Automation' type"
+          echo "3. Add it as NPM_TOKEN in GitHub repository secrets"
+          exit 1
+        fi
+        npm whoami
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         
+    - name: Bump version
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        npm version ${{ github.event.inputs.version_type }} --no-git-tag-version
+        
+    - name: Update CLI version strings
+      run: |
+        VERSION=$(node -p "require('./package.json').version")
+        sed -i "s/\.version('.*')/\.version('$VERSION')/g" src/cli.js
+        sed -i "s/Version: .*/Version: $VERSION');/g" src/cli.js
+        echo "VERSION=v$VERSION" >> $GITHUB_ENV
+        echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
+        
+    - name: Dry run check
+      if: ${{ github.event.inputs.dry_run == 'true' }}
+      run: |
+        echo "🧪 DRY RUN MODE - Not publishing to npm"
+        npm pack --dry-run
+        echo "✅ Package would be published successfully"
+        
+    - name: Publish to npm
+      if: ${{ github.event.inputs.dry_run == 'false' }}
+      run: |
+        echo "🚀 Publishing to npm with tag: ${{ github.event.inputs.npm_tag }}"
+        npm publish --access public --tag ${{ github.event.inputs.npm_tag }}
+        echo "✅ Published multiflow-cli@$PACKAGE_VERSION"
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        
+    - name: Commit version changes
+      if: ${{ github.event.inputs.dry_run == 'false' }}
+      run: |
+        git add package.json src/cli.js
+        git commit -m "🚀 Release v$PACKAGE_VERSION" || echo "No changes to commit"
+        git push origin main
+        
     - name: Create Git Tag
+      if: ${{ github.event.inputs.dry_run == 'false' }}
       uses: actions/github-script@v7
       with:
         script: |
@@ -56,16 +115,17 @@ jobs:
               ref: `refs/tags/${version}`,
               sha: context.sha
             });
-            console.log(`Created tag ${version}`);
+            console.log(`✅ Created tag ${version}`);
           } catch (error) {
             if (error.status === 422) {
-              console.log(`Tag ${version} already exists`);
+              console.log(`⚠️ Tag ${version} already exists`);
             } else {
               throw error;
             }
           }
         
     - name: Create GitHub Release
+      if: ${{ github.event.inputs.dry_run == 'false' }}
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -73,22 +133,44 @@ jobs:
         tag_name: ${{ env.VERSION }}
         release_name: MultiFlow ${{ env.VERSION }}
         body: |
-          **MultiFlow Release**
+          🌊 **MultiFlow ${{ env.VERSION }} Released!**
           
-          ## What's New
-          - Enhanced multi-repo workflow orchestration
-          - Improved CLI commands and user experience
-          - Bug fixes and performance improvements
-          
-          ## Installation
+          ## 🚀 Installation
           ```bash
-          npm install -g multiflow-cli
+          npm install -g multiflow-cli@${{ github.event.inputs.npm_tag }}
           ```
           
-          ## Quick Start
+          ## ⚡ Quick Start
           ```bash
-          flow init
-          flow feature create my-feature
+          mflow init
+          mflow feature create my-feature
+          mflow status my-feature
           ```
+          
+          ## 📚 Documentation
+          - [Getting Started Guide](https://github.com/arunprabusiva/multiflow-cli/blob/main/docs/GUIDE.md)
+          - [All Commands](https://github.com/arunprabusiva/multiflow-cli/blob/main/docs/COMMANDS.md)
+          - [Corporate Setup](https://github.com/arunprabusiva/multiflow-cli/blob/main/docs/CORPORATE-INSTALL.md)
+          
+          ## 🔗 Links
+          - [npm Package](https://www.npmjs.com/package/multiflow-cli)
+          - [GitHub Repository](https://github.com/arunprabusiva/multiflow-cli)
+          
+          ---
+          
+          **⭐ Star this repo if MultiFlow saves you time!**
         draft: false
-        prerelease: false
+        prerelease: ${{ github.event.inputs.npm_tag != 'latest' }}
+        
+    - name: Summary
+      run: |
+        echo "🎉 Publish workflow completed!"
+        echo ""
+        if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+          echo "🧪 DRY RUN - No actual publishing occurred"
+        else
+          echo "✅ Published: multiflow-cli@$PACKAGE_VERSION"
+          echo "🏷️ Tag: ${{ github.event.inputs.npm_tag }}"
+          echo "🔗 npm: https://www.npmjs.com/package/multiflow-cli"
+          echo "📦 GitHub Release: https://github.com/arunprabusiva/multiflow-cli/releases/tag/$VERSION"
+        fi

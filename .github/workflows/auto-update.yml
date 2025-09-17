@@ -31,7 +31,7 @@ jobs:
       run: |
         npm test
         npm link
-        flow --version
+        mflow --version
         
     - name: 📝 Create Pull Request
       uses: peter-evans/create-pull-request@v5

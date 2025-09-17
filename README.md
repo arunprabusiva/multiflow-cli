@@ -1,47 +1,35 @@
 # 🌊 MultiFlow
 
-> **Stop juggling between repositories. Manage your multi-repo projects like a single codebase.**
+> **Manage your multi-repo projects like a single codebase. One command, all repositories, zero hassle.**
 
 [![npm version](https://img.shields.io/npm/v/multiflow-cli.svg)](https://www.npmjs.com/package/multiflow-cli)
 [![CI/CD](https://github.com/arunprabusiva/multiflow-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/arunprabusiva/multiflow-cli/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## The Problem You Face Daily
-
-Working with multiple repositories is **painful**:
-- 🔄 Switching between 5+ terminal tabs
-- 😰 Forgetting to create branches in some repos
-- 🐛 Inconsistent commits across repositories
-- ⏰ Wasting hours on repetitive Git operations
-- 🤯 Complex feature coordination
-
-## Your Solution: MultiFlow
-
-**One command. All repositories. Zero hassle.**
-
-MultiFlow treats your entire multi-repo workspace as a single project:
+**MultiFlow streamlines multi-repository development** by treating your entire workspace as a single project:
 
 ```bash
-flow feature create user-auth    # Creates branches everywhere
-flow feature commit user-auth -m "Add login"    # Commits to all repos
-flow status user-auth           # Shows status across all repos
+mflow feature create user-auth    # Creates branches everywhere
+mflow feature commit user-auth -m "Add login"    # Commits to all repos
+mflow status user-auth           # Shows status across all repos
 ```
 
-## 🚀 Get Started in 30 Seconds
+## 🚀 Quick Start
 
+### Local Installation
 ```bash
-# 1. Install MultiFlow
 npm install -g multiflow-cli
-
-# 2. Navigate to your workspace
 cd /path/to/your/workspace
-
-# 3. Initialize (one-time setup)
-flow init
-
-# 4. Start working!
-flow feature create my-awesome-feature
+mflow init
+mflow feature create my-awesome-feature
 ```
+
+### Corporate/Restricted Environments
+```bash
+npx multiflow-cli init  # No installation needed
+```
+
+💼 **Corporate users?** See our [Corporate Installation Guide](docs/CORPORATE-INSTALL.md) for restricted environments.
 
 **That's it!** MultiFlow automatically discovers your repositories and you're ready to go.
 
@@ -49,7 +37,7 @@ flow feature create my-awesome-feature
 
 ### 🎯 **One Command, All Repos**
 ```bash
-flow feature create payment-system
+mflow feature create payment-system
 # ✅ Creates feature/payment-system in frontend/
 # ✅ Creates feature/payment-system in backend/
 # ✅ Creates feature/payment-system in mobile/
@@ -58,7 +46,7 @@ flow feature create payment-system
 
 ### 🔄 **Synchronized Operations**
 ```bash
-flow feature commit payment-system -m "Add Stripe integration"
+mflow feature commit payment-system -m "Add Stripe integration"
 # ✅ Commits changes in all repositories that have modifications
 # ✅ Uses the same commit message everywhere
 # ✅ Skips repos with no changes
@@ -66,7 +54,7 @@ flow feature commit payment-system -m "Add Stripe integration"
 
 ### 📊 **Visual Status Dashboard**
 ```bash
-flow status payment-system
+mflow status payment-system
 ```
 ```
 payment-system
@@ -79,19 +67,19 @@ payment-system
 ### 👥 **Team Workflows with Profiles**
 ```bash
 # Frontend team works on UI repos only
-flow profile create frontend --repos frontend mobile docs
-flow profile switch frontend
+mflow profile create frontend --repos frontend mobile docs
+mflow profile switch frontend
 
 # Backend team works on API repos only  
-flow profile create backend --repos backend database api
-flow profile switch backend
+mflow profile create backend --repos backend database api
+mflow profile switch backend
 
 # Now all commands only affect your team's repositories!
 ```
 
 ### 🔗 **Instant PR Creation**
 ```bash
-flow pr payment-system --title "Add Stripe payment integration"
+mflow pr payment-system --title "Add Stripe payment integration"
 ```
 ```
 🔗 frontend: https://github.com/yourorg/frontend/compare/main...feature/payment-system
@@ -100,85 +88,55 @@ flow pr payment-system --title "Add Stripe payment integration"
 ```
 **Click links to create PRs instantly!**
 
-## 📋 Essential Commands
+## 🚀 Core Features
 
-| What You Want To Do | Command | Result |
-|---------------------|---------|---------|
-| Start a new feature | `flow feature create user-auth` | Creates branches in all repos |
-| Save your progress | `flow feature commit user-auth -m "Add login"` | Commits changes everywhere |
-| Check your status | `flow status user-auth` | Shows progress across repos |
-| Create pull requests | `flow pr user-auth --title "Add authentication"` | Generates PR URLs |
-| Clean up when done | `flow feature cleanup user-auth` | Removes branches from all repos |
+| Feature | Command | Learn More |
+|---------|---------|------------|
+| **Feature Management** | `mflow feature create user-auth` | [Feature Workflows](docs/FEATURES.md#feature-management) |
+| **Cross-Repo Operations** | `mflow pull` `mflow push` | [Git Operations](docs/FEATURES.md#git-operations) |
+| **Team Profiles** | `mflow profile create frontend` | [Profile System](docs/FEATURES.md#profiles) |
+| **Health Monitoring** | `mflow doctor` | [Workspace Health](docs/FEATURES.md#health-monitoring) |
+| **PR Generation** | `mflow pr user-auth` | [Pull Requests](docs/FEATURES.md#pull-requests) |
+| **Status Dashboard** | `mflow status user-auth` | [Status Tracking](docs/FEATURES.md#status-tracking) |
 
-## 🎯 Real-World Example
+📚 **[View All Commands](docs/COMMANDS.md)** | 🎆 **[Advanced Usage](docs/ADVANCED.md)**
 
-**Scenario:** You're building a new user authentication system that touches frontend, backend, and mobile apps.
+## 🎯 Simple Example
 
-### Without MultiFlow (The Old Way) 😫
+**Building a user authentication feature across multiple repositories:**
+
 ```bash
-# Terminal 1 - Frontend
-cd frontend
-git checkout -b feature/user-auth
-# ... make changes ...
-git add . && git commit -m "Add login form"
+# Create feature branches everywhere
+mflow feature create user-auth
 
-# Terminal 2 - Backend  
-cd ../backend
-git checkout -b feature/user-auth
-# ... make changes ...
-git add . && git commit -m "Add auth endpoints"
+# Make your changes in any repositories...
+# Then commit across all repos at once
+mflow feature commit user-auth -m "Add user authentication"
 
-# Terminal 3 - Mobile
-cd ../mobile
-git checkout -b feature/user-auth
-# ... make changes ...
-git add . && git commit -m "Add login screen"
+# Check progress across all repos
+mflow status user-auth
 
-# Repeat for docs, database, etc...
+# Generate PR URLs for all repos
+mflow pr user-auth --title "Add user authentication system"
+
+# Clean up when done
+mflow feature cleanup user-auth
 ```
 
-### With MultiFlow (The New Way) 🚀
-```bash
-# One terminal, one workspace
-flow feature create user-auth
-# ... make changes in any/all repos ...
-flow feature commit user-auth -m "Add user authentication"
-flow status user-auth
-flow pr user-auth --title "Add user authentication system"
-flow feature cleanup user-auth
-```
+**Result:** One workflow, all repositories synchronized.
 
-**Result:** What took 30 minutes now takes 2 minutes.
+📚 **[See More Examples](docs/GUIDE.md)** with real-world scenarios and advanced workflows.
 
-## 🛠️ Advanced Features
+## 🎆 Advanced Capabilities
 
-### Health Monitoring
-```bash
-flow doctor
-```
-```
-🏥 Workspace Health Check
-✅ frontend: Clean working directory
-⚠️  backend: 3 uncommitted changes
-✅ mobile: Clean working directory
-```
+- **🏥 Health Monitoring** - Check workspace status across all repos
+- **🔄 Synchronized Operations** - Pull, push, checkout across all repos
+- **⚡ Smart Conflict Detection** - Identify merge conflicts before they happen
+- **📈 Visual Status Dashboard** - See progress across all repositories
+- **👥 Team Profiles** - Work with repository subsets (frontend-only, backend-only)
+- **🔗 Instant PR URLs** - Generate GitHub/GitLab pull request links
 
-### Cross-Repo Operations
-```bash
-flow pull          # Pull latest from all repos
-flow push          # Push changes to all repos  
-flow checkout main # Switch all repos to main branch
-```
-
-### Smart Conflict Detection
-```bash
-flow feature merge user-auth
-```
-```
-✅ frontend: Ready for PR (3 files changed)
-⚠️  backend: Merge conflicts detected
-⚪ mobile: No changes to merge
-```
+📚 **[Explore Advanced Features](docs/ADVANCED.md)** with detailed examples and use cases.
 
 ## 🎨 Perfect For
 
@@ -188,12 +146,13 @@ flow feature merge user-auth
 - **Enterprise Teams** - Multiple services, shared libraries
 - **Open Source Projects** - Core, plugins, examples
 
-## 📚 Need Help?
+## 📚 Documentation
 
-- 📖 **[Complete Guide](docs/GUIDE.md)** - Step-by-step tutorials
-- 🔧 **[All Commands](docs/COMMANDS.md)** - Complete reference  
-- 🎆 **[Advanced Features](docs/ADVANCED.md)** - Power user tips
-- ❓ **[FAQ](docs/FAQ.md)** - Common questions
+- 🚀 **[Getting Started Guide](docs/GUIDE.md)** - Step-by-step tutorials
+- 📝 **[All Commands](docs/COMMANDS.md)** - Complete command reference  
+- 🎆 **[Advanced Usage](docs/ADVANCED.md)** - Power user features
+- 💼 **[Corporate Setup](docs/CORPORATE-INSTALL.md)** - Restricted environments & firewalls
+- ❓ **[FAQ](docs/FAQ.md)** - Common questions and troubleshooting
 
 ## 🔧 Requirements
 

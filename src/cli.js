@@ -8,16 +8,16 @@ const program = new Command();
 const repoOrch = new RepoOrch();
 
 program
-  .name('flow')
+  .name('mflow')
   .description('Coordinate Git operations across multiple repositories')
-  .version('2.0.3');
+  .version('2.0.5');
 
 program
   .command('about')
   .description('Show information about MultiFlow')
   .action(() => {
     console.log(chalk.cyan('🌊 MultiFlow - Multi-Repo Workflow CLI'));
-    console.log(chalk.gray('Version: 2.0.3'));
+    console.log(chalk.gray('Version: 2.0.5'));
     console.log(chalk.gray('Created by: Arunprabu Sivapprakasam'));
     console.log(chalk.gray('GitHub: https://github.com/arunprabusiva/multiflow-cli'));
     console.log(chalk.gray('LinkedIn: https://linkedin.com/in/arunprabusiva'));
@@ -287,6 +287,55 @@ program
         try {
           await repoOrch.setDefaultBranch(repo, branch);
           console.log(chalk.green(`✅ Set default branch for ${repo} to ${branch}`));
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  );
+
+program
+  .command('auth')
+  .description('GitHub authentication commands')
+  .addCommand(
+    new Command('login')
+      .description('Login to GitHub (OAuth)')
+      .action(async () => {
+        try {
+          await repoOrch.githubLogin();
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('token')
+      .description('Login with personal access token')
+      .argument('<token>', 'GitHub personal access token')
+      .action(async (token) => {
+        try {
+          await repoOrch.githubLoginWithToken(token);
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('logout')
+      .description('Logout from GitHub')
+      .action(async () => {
+        try {
+          await repoOrch.githubLogout();
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('status')
+      .description('Show authentication status')
+      .action(async () => {
+        try {
+          await repoOrch.githubAuthStatus();
         } catch (error) {
           console.error(chalk.red('❌ Error:', error.message));
         }

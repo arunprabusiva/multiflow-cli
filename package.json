@@ -1,10 +1,10 @@
 {
   "name": "multiflow-cli",
-  "version": "2.0.3",
+  "version": "2.0.5",
   "description": "Multi-repo workflow orchestration CLI - streamline feature development across multiple repositories",
   "main": "src/cli.js",
   "bin": {
-    "flow": "src/cli.js"
+    "mflow": "src/cli.js"
   },
   "homepage": "https://github.com/arunprabusiva/multiflow-cli",
   "repository": {
@@ -18,7 +18,9 @@
     "start": "node src/cli.js",
     "test": "node test/test.js",
     "prepublishOnly": "npm test",
-    "postinstall": "echo \"\\n🌊 MultiFlow installed successfully!\\n✅ Use 'flow --help' to get started\\n\""
+    "postinstall": "echo \"\\n🌊 MultiFlow installed successfully!\\n✅ Use 'mflow --help' to get started\\n💼 Corporate users: Use 'npx multiflow-cli' if 'mflow' doesn't work\\n\"",
+    "build:standalone": "node build-standalone.js",
+    "build:corporate": "bash install-corporate.sh"
   },
   "dependencies": {
     "commander": "^11.0.0",
@@ -26,7 +28,7 @@
     "yaml": "^2.3.2",
     "inquirer": "^9.2.10",
     "chalk": "^4.1.2",
-    "@octokit/rest": "^19.0.13"
+    "@octokit/rest": "^22.0.0"
   },
   "keywords": [
     "git",
@@ -38,7 +40,11 @@
     "github",
     "development",
     "automation",
-    "monorepo"
+    "monorepo",
+    "corporate",
+    "enterprise",
+
+    "npx"
   ],
   "author": {
     "name": "Arunprabu Sivapprakasam",

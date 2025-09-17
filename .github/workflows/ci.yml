@@ -26,7 +26,9 @@ jobs:
         cache: 'npm'
         
     - name: Install dependencies
-      run: npm ci
+      run: |
+        # Try npm ci first, fallback to npm install if lock file is out of sync
+        npm ci || npm install
       
     - name: Run tests
       run: npm test
@@ -34,9 +36,9 @@ jobs:
     - name: Test CLI commands
       run: |
         npm link
-        flow --version
-        flow --help
-        flow about
+        mflow --version
+        mflow --help
+        mflow about
 
   integration-test:
     name: Integration Test
@@ -55,7 +57,7 @@ jobs:
         
     - name: Install and link
       run: |
-        npm ci
+        npm ci || npm install
         npm link
         
     - name: Create test workspace
@@ -71,9 +73,9 @@ jobs:
         cd ..
         
         # Test MultiFlow workflow
-        flow init
-        flow feature create test-feature
-        flow status test-feature
-        flow doctor
-        flow checkout master
-        flow feature cleanup test-feature
+        mflow init
+        mflow feature create test-feature
+        mflow status test-feature
+        mflow doctor
+        mflow checkout master
+        mflow feature cleanup test-feature

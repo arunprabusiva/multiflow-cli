@@ -1,0 +1,124 @@
+name: Performance Testing
+
+on:
+  schedule:
+    - cron: '0 4 * * 0'  # Weekly on Sundays at 4 AM
+  workflow_dispatch:
+
+jobs:
+  performance-test:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: |
+        npm ci
+        npm link
+        
+    - name: Create large test workspace
+      run: |
+        mkdir perf-test
+        cd perf-test
+        
+        # Create 20 repositories for performance testing
+        for i in {1..20}; do
+          mkdir "repo-$i"
+          cd "repo-$i"
+          git init
+          git config user.email "perf@test.com"
+          git config user.name "Perf Test"
+          
+          # Create multiple files per repo
+          for j in {1..10}; do
+            echo "// File $j in repo $i" > "file-$j.js"
+          done
+          
+          git add .
+          git commit -m "Initial setup for repo-$i"
+          cd ..
+        done
+        
+    - name: Performance benchmarks
+      run: |
+        cd perf-test
+        
+        echo "🚀 Starting performance tests..."
+        
+        # Test initialization time
+        echo "⏱️ Testing initialization..."
+        time mflow init
+        
+        # Test feature creation across many repos
+        echo "⏱️ Testing feature creation..."
+        time mflow feature create perf-test-feature
+        
+        # Test status checking
+        echo "⏱️ Testing status check..."
+        time mflow status perf-test-feature
+        
+        # Test doctor command
+        echo "⏱️ Testing health check..."
+        time mflow doctor
+        
+        # Test cleanup
+        echo "⏱️ Testing cleanup..."
+        time mflow feature cleanup perf-test-feature
+        
+        echo "✅ Performance tests completed"
+
+  memory-usage:
+    name: Memory Usage Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        
+    - name: Install dependencies and monitoring tools
+      run: |
+        npm ci
+        npm link
+        sudo apt-get update
+        sudo apt-get install -y time
+        
+    - name: Memory usage test
+      run: |
+        mkdir memory-test
+        cd memory-test
+        
+        # Create test repos
+        for i in {1..10}; do
+          mkdir "repo-$i"
+          cd "repo-$i"
+          git init
+          git config user.email "memory@test.com"
+          git config user.name "Memory Test"
+          echo "# Repo $i" > README.md
+          git add .
+          git commit -m "Initial"
+          cd ..
+        done
+        
+        # Monitor memory usage during operations
+        echo "📊 Memory usage during MultiFlow operations:"
+        
+        /usr/bin/time -v mflow init 2>&1 | grep "Maximum resident set size"
+        /usr/bin/time -v mflow feature create memory-test 2>&1 | grep "Maximum resident set size"
+        /usr/bin/time -v mflow status memory-test 2>&1 | grep "Maximum resident set size"
+        /usr/bin/time -v mflow doctor 2>&1 | grep "Maximum resident set size"

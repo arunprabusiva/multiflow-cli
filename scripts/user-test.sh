@@ -23,11 +23,11 @@ npm install -g multiflow-cli
 # Check installation
 echo ""
 echo "🔍 Checking installation..."
-if command -v flow &> /dev/null; then
-    echo "✅ 'flow' command is available globally"
-    flow --version
+if command -v mflow &> /dev/null; then
+    echo "✅ 'mflow' command is available globally"
+    mflow --version
 else
-    echo "⚠️  'flow' command not found, using npx fallback"
+    echo "⚠️  'mflow' command not found, using npx fallback"
     npx multiflow-cli --version
 fi
 
@@ -76,24 +76,24 @@ echo ""
 echo "🚀 Testing the 30-second getting started experience..."
 
 echo "  Step 1: Initialize MultiFlow..."
-if command -v flow &> /dev/null; then
-    flow init
+if command -v mflow &> /dev/null; then
+    mflow init
 else
     npx multiflow-cli init
 fi
 
 echo ""
 echo "  Step 2: Create a feature..."
-if command -v flow &> /dev/null; then
-    flow feature create user-authentication
+if command -v mflow &> /dev/null; then
+    mflow feature create user-authentication
 else
     npx multiflow-cli feature create user-authentication
 fi
 
 echo ""
 echo "  Step 3: Check status..."
-if command -v flow &> /dev/null; then
-    flow status user-authentication
+if command -v mflow &> /dev/null; then
+    mflow status user-authentication
 else
     npx multiflow-cli status user-authentication
 fi
@@ -104,8 +104,8 @@ echo "📝 Making changes and testing commit..."
 echo "// Added login functionality" >> frontend/app.js
 echo "// Added auth endpoints" >> backend/server.js
 
-if command -v flow &> /dev/null; then
-    flow feature commit user-authentication -m "Add user authentication system"
+if command -v mflow &> /dev/null; then
+    mflow feature commit user-authentication -m "Add user authentication system"
 else
     npx multiflow-cli feature commit user-authentication -m "Add user authentication system"
 fi
@@ -115,24 +115,24 @@ echo ""
 echo "🧪 Testing essential commands..."
 
 echo "  → Testing doctor command..."
-if command -v flow &> /dev/null; then
-    flow doctor
+if command -v mflow &> /dev/null; then
+    mflow doctor
 else
     npx multiflow-cli doctor
 fi
 
 echo "  → Testing profile creation..."
-if command -v flow &> /dev/null; then
-    flow profile create frontend-team --repos frontend mobile docs
-    flow profile list
+if command -v mflow &> /dev/null; then
+    mflow profile create frontend-team --repos frontend mobile docs
+    mflow profile list
 else
     npx multiflow-cli profile create frontend-team --repos frontend mobile docs
     npx multiflow-cli profile list
 fi
 
 echo "  → Testing PR URL generation..."
-if command -v flow &> /dev/null; then
-    flow pr user-authentication --title "Add user authentication system"
+if command -v mflow &> /dev/null; then
+    mflow pr user-authentication --title "Add user authentication system"
 else
     npx multiflow-cli pr user-authentication --title "Add user authentication system"
 fi
@@ -140,8 +140,8 @@ fi
 # Clean up feature
 echo ""
 echo "🧹 Cleaning up feature..."
-if command -v flow &> /dev/null; then
-    flow feature cleanup user-authentication
+if command -v mflow &> /dev/null; then
+    mflow feature cleanup user-authentication
 else
     npx multiflow-cli feature cleanup user-authentication
 fi
