@@ -18,8 +18,11 @@ Stop juggling between repositories! MultiFlow orchestrates Git operations across
 **The Solution:** MultiFlow treats your multi-repo workspace as a single unit, enabling:
 - ✅ **One command** to create feature branches everywhere
 - ✅ **Synchronized commits** across all repositories
+- ✅ **Profile-based workflows** - work on specific repo subsets
+- ✅ **Smart Git operations** - pull, push, checkout across repos
+- ✅ **Automated PR creation** with GitHub/GitLab URLs
 - ✅ **Conflict detection** before merge attempts
-- ✅ **Automated cleanup** of feature branches
+- ✅ **Workspace health monitoring** and diagnostics
 - ✅ **Visual status** of your entire feature workflow
 
 ## 📦 Installation
@@ -110,6 +113,18 @@ flow feature cleanup payment-system
 |---------|-------------|----------|
 | `flow init` | Scan workspace and create config | `flow init` |
 | `flow status <feature>` | Show feature status across repos | `flow status auth-system` |
+| `flow doctor` | Check workspace health | `flow doctor` |
+| `flow about` | Show MultiFlow information | `flow about` |
+
+### Git Operations
+
+| Command | Description | Example |
+|---------|-------------|----------|
+| `flow pull` | Pull latest changes from all repos | `flow pull` |
+| `flow push` | Push changes to all repos | `flow push` |
+| `flow checkout <branch>` | Switch branches across all repos | `flow checkout main` |
+| `flow diff <feature>` | Show changes across repos | `flow diff payment-system` |
+| `flow pr <feature>` | Create pull requests for feature | `flow pr user-auth --title "Add authentication"` |
 
 ### Feature Management
 
@@ -120,6 +135,16 @@ flow feature cleanup payment-system
 | `flow feature publish <name>` | Push branches to remotes | `flow feature publish user-auth` |
 | `flow feature merge <name>` | Check conflicts, prepare PRs | `flow feature merge user-auth` |
 | `flow feature cleanup <name>` | Delete feature branches | `flow feature cleanup user-auth` |
+
+### Profile Management
+
+| Command | Description | Example |
+|---------|-------------|----------|
+| `flow profile create <name> --repos <list>` | Create new profile | `flow profile create frontend --repos frontend mobile` |
+| `flow profile list` | List all profiles | `flow profile list` |
+| `flow profile show <name>` | Show profile details | `flow profile show frontend` |
+| `flow profile switch <name>` | Switch to profile | `flow profile switch frontend` |
+| `flow profile delete <name>` | Delete profile (with confirmation) | `flow profile delete old-profile` |
 
 ### Configuration Commands
 
@@ -137,40 +162,58 @@ Want to see MultiFlow in action? Here's a complete test you can run:
 mkdir multiflow-test && cd multiflow-test
 
 # 2. Create mock repositories
-mkdir frontend backend database
+mkdir frontend backend mobile
 cd frontend && git init && echo "# Frontend" > README.md && git add . && git commit -m "Initial"
 cd ../backend && git init && echo "# Backend" > README.md && git add . && git commit -m "Initial" 
-cd ../database && git init && echo "# Database" > README.md && git add . && git commit -m "Initial"
+cd ../mobile && git init && echo "# Mobile" > README.md && git add . && git commit -m "Initial"
 cd ..
 
 # 3. Initialize MultiFlow
 flow init
 # Output: Found 3 repositories ✅ Workspace initialized successfully
 
-# 4. Create feature
-flow feature create payment-system
-# Output: ✅ Feature 'payment-system' created across all repos
+# 4. Create profiles for different workflows
+flow profile create frontend-only --repos frontend
+flow profile create fullstack --repos frontend backend mobile
 
-# 5. Make changes
-cd frontend && echo "PaymentForm component" > payment.js && git add .
-cd ../backend && echo "Payment API" > payment.py && git add .
+# 5. Switch to frontend profile
+flow profile switch frontend-only
+
+# 6. Create feature (only affects frontend)
+flow feature create user-login
+# Output: ✅ frontend: Created branch feature/user-login
+
+# 7. Make changes and commit
+cd frontend && echo "Login component" > Login.js && git add .
 cd ..
+flow feature commit user-login -m "Add login component"
 
-# 6. Commit changes
-flow feature commit payment-system -m "Add payment components"
-# Output: ✅ Changes committed for feature 'payment-system'
+# 8. Check workspace health
+flow doctor
+# Output: 🎯 Workspace is healthy - ready for development!
 
-# 7. Check status
-flow status payment-system
-# Output: Beautiful tree showing all repo states
+# 9. Switch to fullstack profile
+flow profile switch fullstack
 
-# 8. Test merge readiness
-flow feature merge payment-system
-# Output: ✅ Ready for PR (files changed per repo)
+# 10. Create cross-repo feature
+flow feature create payment-system
+# Output: ✅ Feature created across all 3 repos
 
-# 9. Cleanup
+# 11. Show differences
+flow diff user-login --summary
+
+# 12. Create pull requests
+flow pr payment-system --title "Add payment integration"
+# Output: GitHub PR URLs for each repository
+
+# 13. Cleanup
+flow feature cleanup user-login
 flow feature cleanup payment-system
-# Output: ✅ Feature 'payment-system' cleaned up
+
+# 14. Profile management
+flow profile list
+flow profile delete frontend-only
+# Asks for confirmation before deletion
 ```
 
 ## ⚙️ Configuration
@@ -182,16 +225,31 @@ repos:
   frontend:
     path: frontend
     hasRemote: true
+    defaultBranch: main
   backend:
     path: backend  
     hasRemote: true
-  database:
-    path: database
+    defaultBranch: main
+  mobile:
+    path: mobile
     hasRemote: false
+    defaultBranch: master
+    
+profiles:
+  frontend-only:
+    repos: [frontend]
+    created: 2024-01-15T10:30:00.000Z
+  fullstack:
+    repos: [frontend, backend, mobile]
+    created: 2024-01-15T11:00:00.000Z
+    
+settings:
+  activeProfile: fullstack
+  
 features:
   payment-system:
     branch: feature/payment-system
-    repos: [frontend, backend, database]
+    repos: [frontend, backend, mobile]
     created: 2024-01-15T10:30:00.000Z
 ```
 
@@ -216,6 +274,41 @@ flow feature create admin-panel
 # Each feature is isolated per repository
 flow status user-auth     # Shows user-auth branches
 flow status payment-system # Shows payment-system branches
+```
+
+### Profile-Based Development
+```bash
+# Create profiles for different development workflows
+flow profile create frontend-only --repos frontend shared-components
+flow profile create backend-only --repos backend database
+flow profile create fullstack --repos frontend backend mobile
+
+# Switch between profiles
+flow profile switch frontend-only
+# Now all commands only affect: frontend, shared-components
+
+flow feature create user-login
+# Only creates branches in frontend & shared-components!
+
+# List profiles with active indicator
+flow profile list
+# Output:
+# ✅ frontend-only (2 repos) ← active
+# ⚪ backend-only (2 repos)
+# ⚪ fullstack (3 repos)
+```
+
+### Git Operations
+```bash
+# Pull/Push across all active repositories
+flow pull    # Pull latest changes
+flow push    # Push local changes
+
+# Create pull requests with generated URLs
+flow pr payment-system --title "Add Stripe integration"
+# Output:
+# 🔗 frontend: Create PR at: https://github.com/user/frontend/compare/main...feature/payment-system
+# 🔗 backend: Create PR at: https://github.com/user/backend/compare/main...feature/payment-system
 ```
 
 ### Conflict Detection
@@ -254,6 +347,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## 🆘 Support
 
 - 📖 **Documentation**: [Full docs](https://github.com/arunprabusiva/multiflow-cli/wiki)
+- 🎆 **Features Guide**: [Complete features documentation](FEATURES.md)
 - 🐛 **Issues**: [Report bugs](https://github.com/arunprabusiva/multiflow-cli/issues)
 - 💬 **Discussions**: [Ask questions](https://github.com/arunprabusiva/multiflow-cli/discussions)
 
