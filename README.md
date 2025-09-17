@@ -44,36 +44,32 @@ npm link
 
 ### 1. **Setup Your Workspace**
 ```bash
-# Navigate to your multi-repo folder
 cd /path/to/your/workspace
-# Example structure:
-# workspace/
-# ├── frontend/     (React app)
-# ├── backend/      (Node.js API) 
-# ├── database/     (SQL migrations)
-# └── docs/         (Documentation)
-
-# Initialize MultiFlow
 flow init
+```
+**Example workspace structure:**
+```
+workspace/
+├── frontend/     (React app)
+├── backend/      (Node.js API) 
+├── database/     (SQL migrations)
+└── docs/         (Documentation)
 ```
 
 ### 2. **Start a Feature**
 ```bash
-# Creates feature/payment-system branch in ALL repos
 flow feature create payment-system
 ```
+Creates `feature/payment-system` branch in ALL repositories
 
 ### 3. **Make Your Changes**
-```bash
-# Edit files in any/all repositories
-# frontend/src/PaymentForm.jsx
-# backend/routes/payment.js  
-# database/migrations/add_payments.sql
-```
+Edit files in any/all repositories:
+- `frontend/src/PaymentForm.jsx`
+- `backend/routes/payment.js`  
+- `database/migrations/add_payments.sql`
 
 ### 4. **Commit Across All Repos**
 ```bash
-# Stages and commits changes in all repos with changes
 flow feature commit payment-system -m "Add payment integration"
 ```
 
@@ -92,18 +88,16 @@ payment-system
 
 ### 6. **Publish & Merge**
 ```bash
-# Push branches to remotes
 flow feature publish payment-system
-
-# Check for conflicts and prepare PRs
 flow feature merge payment-system
 ```
+Push branches to remotes and check for conflicts
 
 ### 7. **Cleanup When Done**
 ```bash
-# Remove feature branches from all repos
 flow feature cleanup payment-system
 ```
+Remove feature branches from all repositories
 
 ## 📋 Complete Command Reference
 
@@ -170,9 +164,8 @@ cd ..
 
 # 3. Initialize MultiFlow
 flow init
-# Output: Found 3 repositories ✅ Workspace initialized successfully
 
-# 4. Create profiles for different workflows
+# 4. Create profiles
 flow profile create frontend-only --repos frontend
 flow profile create fullstack --repos frontend backend mobile
 
@@ -181,7 +174,6 @@ flow profile switch frontend-only
 
 # 6. Create feature (only affects frontend)
 flow feature create user-login
-# Output: ✅ frontend: Created branch feature/user-login
 
 # 7. Make changes and commit
 cd frontend && echo "Login component" > Login.js && git add .
@@ -190,21 +182,18 @@ flow feature commit user-login -m "Add login component"
 
 # 8. Check workspace health
 flow doctor
-# Output: 🎯 Workspace is healthy - ready for development!
 
 # 9. Switch to fullstack profile
 flow profile switch fullstack
 
 # 10. Create cross-repo feature
 flow feature create payment-system
-# Output: ✅ Feature created across all 3 repos
 
 # 11. Show differences
 flow diff user-login --summary
 
 # 12. Create pull requests
 flow pr payment-system --title "Add payment integration"
-# Output: GitHub PR URLs for each repository
 
 # 13. Cleanup
 flow feature cleanup user-login
@@ -213,7 +202,6 @@ flow feature cleanup payment-system
 # 14. Profile management
 flow profile list
 flow profile delete frontend-only
-# Asks for confirmation before deletion
 ```
 
 ## ⚙️ Configuration
