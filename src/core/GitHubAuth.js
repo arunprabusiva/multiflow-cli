@@ -1,5 +1,4 @@
 const { Octokit } = require('@octokit/rest');
-const open = require('open');
 const http = require('http');
 const url = require('url');
 const chalk = require('chalk');

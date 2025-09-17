@@ -1,6 +1,6 @@
 {
   "name": "multiflow-cli",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Multi-repo workflow orchestration CLI - streamline feature development across multiple repositories",
   "main": "src/cli.js",
   "bin": {
@@ -26,8 +26,7 @@
     "yaml": "^2.3.2",
     "inquirer": "^9.2.10",
     "chalk": "^4.1.2",
-    "open": "^8.4.2",
-    "@octokit/rest": "^20.0.2"
+    "@octokit/rest": "^19.0.13"
   },
   "keywords": [
     "git",
