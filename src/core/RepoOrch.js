@@ -288,15 +288,22 @@ class RepoOrch {
   async showConfig() {
     await this.loadConfig();
     
+    const activeProfile = this.config.settings?.activeProfile || 'default';
+    const activeRepos = this.getActiveRepos();
+    
     console.log(chalk.bold('\n📄 Workspace Configuration'));
     console.log('========================\n');
     
+    console.log(chalk.bold(`Active Profile: ${chalk.cyan(activeProfile)}`));
+    console.log(`Active Repositories: ${Object.keys(activeRepos).length}/${Object.keys(this.config.repos).length}\n`);
+    
     console.log(chalk.bold('Repositories:'));
     for (const [name, info] of Object.entries(this.config.repos)) {
-      console.log(`├─ ${name}:`);
-      console.log(`│  ├─ Path: ${info.path}`);
-      console.log(`│  ├─ Default Branch: ${chalk.cyan(info.defaultBranch || 'main')}`);
-      console.log(`│  └─ Remote: ${info.hasRemote ? '✅ Yes' : '⚪ No'}`);
+      const isActive = activeRepos[name] ? '✅' : '⚪';
+      console.log(`${isActive} ${name}:`);
+      console.log(`   ├─ Path: ${info.path}`);
+      console.log(`   ├─ Default Branch: ${chalk.cyan(info.defaultBranch || 'main')}`);
+      console.log(`   └─ Remote: ${info.hasRemote ? '✅ Yes' : '⚪ No'}`);
     }
     
     console.log('\n' + chalk.bold('Active Features:'));
@@ -541,6 +548,72 @@ class RepoOrch {
     });
     
     return `${webUrl}/compare/${targetBranch}...${sourceBranch}?${params.toString()}`;
+  }
+
+  async listProfiles() {
+    await this.loadConfig();
+    
+    const profiles = this.config.profiles || {};
+    const activeProfile = this.config.settings?.activeProfile || 'default';
+    
+    console.log(chalk.bold('\n📁 Available Profiles'));
+    console.log('===================\n');
+    
+    if (Object.keys(profiles).length === 0) {
+      console.log('⚪ No profiles created yet');
+      console.log('Create one with: flow profile create <name>');
+      return;
+    }
+    
+    for (const [name, profile] of Object.entries(profiles)) {
+      const isActive = name === activeProfile;
+      const indicator = isActive ? '✅' : '⚪';
+      console.log(`${indicator} ${name} (${profile.repos.length} repos)${isActive ? ' ← active' : ''}`);
+    }
+  }
+
+  async showProfile(profileName) {
+    await this.loadConfig();
+    
+    const profile = this.config.profiles?.[profileName];
+    if (!profile) {
+      throw new Error(`Profile '${profileName}' not found`);
+    }
+    
+    const isActive = profileName === (this.config.settings?.activeProfile || 'default');
+    
+    console.log(chalk.bold(`\n📁 Profile: ${profileName}${isActive ? ' (active)' : ''}`));
+    console.log('========================\n');
+    
+    console.log(chalk.bold('Repositories:'));
+    for (const repoName of profile.repos) {
+      const repoInfo = this.config.repos[repoName];
+      if (repoInfo) {
+        console.log(`✅ ${repoName} (${repoInfo.path})`);
+      } else {
+        console.log(`❌ ${repoName} (not found)`);
+      }
+    }
+    
+    console.log(`\nCreated: ${new Date(profile.created).toLocaleString()}`);
+  }
+
+  async deleteProfile(profileName) {
+    await this.loadConfig();
+    
+    if (!this.config.profiles?.[profileName]) {
+      throw new Error(`Profile '${profileName}' not found`);
+    }
+    
+    const activeProfile = this.config.settings?.activeProfile || 'default';
+    if (profileName === activeProfile) {
+      throw new Error(`Cannot delete active profile '${profileName}'. Switch to another profile first.`);
+    }
+    
+    delete this.config.profiles[profileName];
+    await this.saveConfig();
+    
+    console.log(`✅ Profile '${profileName}' deleted`);
   }
 }
 

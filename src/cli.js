@@ -222,6 +222,41 @@ program
           console.error(chalk.red('❌ Error:', error.message));
         }
       })
+  )
+  .addCommand(
+    new Command('list')
+      .description('List all profiles')
+      .action(async () => {
+        try {
+          await repoOrch.listProfiles();
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('delete')
+      .description('Delete a profile')
+      .argument('<name>', 'Profile name')
+      .action(async (name) => {
+        try {
+          await repoOrch.deleteProfile(name);
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('show')
+      .description('Show profile details')
+      .argument('<name>', 'Profile name')
+      .action(async (name) => {
+        try {
+          await repoOrch.showProfile(name);
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
   );
 
 program
