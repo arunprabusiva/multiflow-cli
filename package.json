@@ -1,6 +1,6 @@
 {
   "name": "multiflow-cli",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Multi-repo workflow orchestration CLI - streamline feature development across multiple repositories",
   "main": "src/cli.js",
   "bin": {
