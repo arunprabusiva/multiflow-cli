@@ -45,12 +45,12 @@ class GitHubAuth {
 
   async login() {
     console.log(chalk.yellow('📝 GitHub OAuth login not yet available.'));
-    console.log('Please use: flow auth token <your-github-token>');
+    console.log('Please use: mflow auth token <your-github-token>');
     console.log('');
     console.log('To get a token:');
     console.log('1. Go to https://github.com/settings/tokens');
     console.log('2. Generate new token with "repo" scope');
-    console.log('3. Run: flow auth token <your-token>');
+    console.log('3. Run: mflow auth token <your-token>');
     
     throw new Error('Use personal access token for now');
   }
@@ -80,7 +80,7 @@ class GitHubAuth {
   async getAuthenticatedUser() {
     const token = await this.loadToken();
     if (!token) {
-      throw new Error('Not authenticated. Run: flow auth login');
+      throw new Error('Not authenticated. Run: mflow auth login');
     }
 
     if (!this.octokit) {
@@ -91,7 +91,7 @@ class GitHubAuth {
       const { data: user } = await this.octokit.rest.users.getAuthenticated();
       return user;
     } catch (error) {
-      throw new Error('Authentication expired. Please login again: flow auth login');
+      throw new Error('Authentication expired. Please login again: mflow auth login');
     }
   }
 
@@ -99,7 +99,7 @@ class GitHubAuth {
     if (!this.octokit) {
       const token = await this.loadToken();
       if (!token) {
-        throw new Error('Not authenticated. Run: flow auth login');
+        throw new Error('Not authenticated. Run: mflow auth login');
       }
       this.octokit = new Octokit({ auth: token });
     }

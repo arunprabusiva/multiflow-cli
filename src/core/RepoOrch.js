@@ -670,7 +670,7 @@ class RepoOrch {
       console.log(chalk.gray(`   Profile: ${user.html_url}`));
     } catch (error) {
       console.log(chalk.yellow('⚠️  Not authenticated'));
-      console.log(chalk.gray('   Run: flow auth token <your-token>'));
+      console.log(chalk.gray('   Run: mflow auth token <your-token>'));
     }
   }
 }
