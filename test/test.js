@@ -11,7 +11,7 @@ try {
   const cliPath = path.join(__dirname, '..', 'src', 'cli.js');
   const helpOutput = execSync(`node "${cliPath}" --help`, { encoding: 'utf8' });
   
-  if (helpOutput.includes('Multi-repo workflow orchestration CLI')) {
+  if (helpOutput.includes('Coordinate Git operations across multiple repositories')) {
     console.log('✅ CLI help command works');
   } else {
     throw new Error('CLI help output incorrect');

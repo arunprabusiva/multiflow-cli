@@ -3,14 +3,13 @@ const path = require('path');
 const simpleGit = require('simple-git');
 const YAML = require('yaml');
 const chalk = require('chalk');
-const GitHubClient = require('./GitHubClient');
 const ConflictDetector = require('./ConflictDetector');
 
 class RepoOrch {
   constructor() {
     this.configPath = '.flow.yml';
     this.config = null;
-    this.github = process.env.GITHUB_TOKEN ? new GitHubClient(process.env.GITHUB_TOKEN) : null;
+    this.github = null; // GitHub integration disabled for now
   }
 
   async loadConfig() {
@@ -307,6 +306,85 @@ class RepoOrch {
       for (const [name, info] of Object.entries(this.config.features)) {
         console.log(`├─ ${name}: ${info.branch}`);
       }
+    }
+  }
+
+  async checkoutAll(branch) {
+    await this.loadConfig();
+    
+    for (const [repoName, repoInfo] of Object.entries(this.config.repos)) {
+      const git = simpleGit(repoInfo.path);
+      
+      try {
+        await git.checkout(branch);
+        console.log(`✅ ${repoName}: Switched to ${branch}`);
+      } catch (error) {
+        console.log(`⚠️  ${repoName}: ${error.message}`);
+      }
+    }
+  }
+
+  async showDiff(featureName, options = {}) {
+    await this.loadConfig();
+    const feature = this.config.features[featureName];
+    
+    if (!feature) {
+      throw new Error(`Feature '${featureName}' not found`);
+    }
+    
+    console.log(chalk.bold(`\n📈 Cross-Repository Changes Summary`));
+    console.log(`Feature: ${featureName} vs main\n`);
+    
+    for (const repoName of feature.repos) {
+      const repoInfo = this.config.repos[repoName];
+      const defaultBranch = repoInfo.defaultBranch || 'main';
+      
+      try {
+        const changedFiles = await ConflictDetector.getChangedFiles(repoInfo.path, feature.branch, defaultBranch);
+        if (changedFiles.length > 0) {
+          console.log(`📁 ${repoName}: ${changedFiles.length} files changed`);
+          if (!options.summary) {
+            changedFiles.forEach(file => console.log(`   - ${file}`));
+          }
+        } else {
+          console.log(`⚪ ${repoName}: No changes`);
+        }
+      } catch (error) {
+        console.log(`❌ ${repoName}: Error reading diff`);
+      }
+    }
+  }
+
+  async doctor() {
+    await this.loadConfig();
+    
+    console.log(chalk.bold('\n🏥 Workspace Health Check'));
+    console.log('========================\n');
+    
+    let healthyRepos = 0;
+    let totalRepos = Object.keys(this.config.repos).length;
+    
+    for (const [repoName, repoInfo] of Object.entries(this.config.repos)) {
+      const git = simpleGit(repoInfo.path);
+      
+      try {
+        const status = await git.status();
+        const isClean = status.files.length === 0;
+        
+        console.log(`${isClean ? '✅' : '⚠️ '} ${repoName}: ${isClean ? 'Clean working directory' : `${status.files.length} uncommitted changes`}`);
+        
+        if (isClean) healthyRepos++;
+      } catch (error) {
+        console.log(`❌ ${repoName}: Git error - ${error.message}`);
+      }
+    }
+    
+    console.log(`\n📊 Health Score: ${healthyRepos}/${totalRepos} repositories healthy`);
+    
+    if (healthyRepos === totalRepos) {
+      console.log(chalk.green('🎯 Workspace is healthy - ready for development!'));
+    } else {
+      console.log(chalk.yellow('⚠️  Some repositories need attention'));
     }
   }
 }

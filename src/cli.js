@@ -9,7 +9,7 @@ const repoOrch = new RepoOrch();
 
 program
   .name('flow')
-  .description('Multi-repo workflow orchestration CLI')
+  .description('Coordinate Git operations across multiple repositories')
   .version('1.2.1');
 
 program
@@ -114,6 +114,43 @@ program
   .action(async (name) => {
     try {
       await repoOrch.showStatus(name);
+    } catch (error) {
+      console.error(chalk.red('❌ Error:', error.message));
+    }
+  });
+
+program
+  .command('checkout')
+  .description('Switch branches across all repos')
+  .argument('<branch>', 'Branch name or feature name')
+  .action(async (branch) => {
+    try {
+      await repoOrch.checkoutAll(branch);
+      console.log(chalk.green(`✅ Switched all repos to ${branch}`));
+    } catch (error) {
+      console.error(chalk.red('❌ Error:', error.message));
+    }
+  });
+
+program
+  .command('diff')
+  .description('Show changes across repos')
+  .argument('<feature>', 'Feature name')
+  .option('-s, --summary', 'Show summary only')
+  .action(async (feature, options) => {
+    try {
+      await repoOrch.showDiff(feature, options);
+    } catch (error) {
+      console.error(chalk.red('❌ Error:', error.message));
+    }
+  });
+
+program
+  .command('doctor')
+  .description('Check workspace health')
+  .action(async () => {
+    try {
+      await repoOrch.doctor();
     } catch (error) {
       console.error(chalk.red('❌ Error:', error.message));
     }
