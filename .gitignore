@@ -7,10 +7,16 @@ node_modules/
 # Development files
 SOCIAL.md
 PUBLISH.md
+DEPLOY_CHECKLIST.md
+AUTHORS.md
+USER_GUIDE.md
+push-to-github.md
 test-multiflow.sh
 test-multiflow.bat
 test-npm-install.sh
-push-to-github.md
+deploy.sh
+deploy.bat
+setup-auth.bat
 
 # Test directories
 multiflow-test*/
