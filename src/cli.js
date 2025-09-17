@@ -10,14 +10,22 @@ const repoOrch = new RepoOrch();
 program
   .name('flow')
   .description('Coordinate Git operations across multiple repositories')
+<<<<<<< HEAD
   .version('1.2.0');
+=======
+  .version('1.2.1');
+>>>>>>> feature/complete-multiflow-v2
 
 program
   .command('about')
   .description('Show information about MultiFlow')
   .action(() => {
     console.log(chalk.cyan('🌊 MultiFlow - Multi-Repo Workflow CLI'));
+<<<<<<< HEAD
     console.log(chalk.gray('Version: 1.2.0'));
+=======
+    console.log(chalk.gray('Version: 1.2.1'));
+>>>>>>> feature/complete-multiflow-v2
     console.log(chalk.gray('Created by: Arunprabu Sivapprakasam'));
     console.log(chalk.gray('GitHub: https://github.com/arunprabusiva/multiflow-cli'));
     console.log(chalk.gray('LinkedIn: https://linkedin.com/in/arunprabusiva'));
@@ -177,7 +185,112 @@ program
     }
   });
 
+<<<<<<< HEAD
 
+=======
+program
+  .command('pull')
+  .description('Pull latest changes from all repos')
+  .action(async () => {
+    try {
+      await repoOrch.pullAll();
+      console.log(chalk.green('✅ Pull completed across all repositories'));
+    } catch (error) {
+      console.error(chalk.red('❌ Error:', error.message));
+    }
+  });
+
+program
+  .command('push')
+  .description('Push changes to all repos')
+  .action(async () => {
+    try {
+      await repoOrch.pushAll();
+      console.log(chalk.green('✅ Push completed across all repositories'));
+    } catch (error) {
+      console.error(chalk.red('❌ Error:', error.message));
+    }
+  });
+
+program
+  .command('pr')
+  .description('Create pull requests for feature')
+  .argument('<feature>', 'Feature name')
+  .option('-t, --title <title>', 'PR title')
+  .option('-b, --body <body>', 'PR description', '')
+  .action(async (feature, options) => {
+    try {
+      const title = options.title || `feat: ${feature}`;
+      await repoOrch.createPRs(feature, title, options.body);
+    } catch (error) {
+      console.error(chalk.red('❌ Error:', error.message));
+    }
+  });
+
+program
+  .command('profile')
+  .description('Profile management commands')
+  .addCommand(
+    new Command('create')
+      .description('Create a new profile')
+      .argument('<name>', 'Profile name')
+      .option('-r, --repos <repos...>', 'Repository names to include')
+      .action(async (name, options) => {
+        try {
+          await repoOrch.createProfile(name, options.repos || []);
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('switch')
+      .description('Switch to a profile')
+      .argument('<name>', 'Profile name')
+      .action(async (name) => {
+        try {
+          await repoOrch.switchProfile(name);
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('list')
+      .description('List all profiles')
+      .action(async () => {
+        try {
+          await repoOrch.listProfiles();
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('delete')
+      .description('Delete a profile')
+      .argument('<name>', 'Profile name')
+      .action(async (name) => {
+        try {
+          await repoOrch.deleteProfile(name);
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  )
+  .addCommand(
+    new Command('show')
+      .description('Show profile details')
+      .argument('<name>', 'Profile name')
+      .action(async (name) => {
+        try {
+          await repoOrch.showProfile(name);
+        } catch (error) {
+          console.error(chalk.red('❌ Error:', error.message));
+        }
+      })
+  );
+>>>>>>> feature/complete-multiflow-v2
 
 program
   .command('config')

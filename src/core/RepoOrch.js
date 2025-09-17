@@ -3,8 +3,11 @@ const path = require('path');
 const simpleGit = require('simple-git');
 const YAML = require('yaml');
 const chalk = require('chalk');
+<<<<<<< HEAD
 const GitHubClient = require('./GitHubClient');
 const GitHubAuth = require('./GitHubAuth');
+=======
+>>>>>>> feature/complete-multiflow-v2
 const ConflictDetector = require('./ConflictDetector');
 const inquirer = require('inquirer');
 
@@ -12,8 +15,12 @@ class RepoOrch {
   constructor() {
     this.configPath = '.multiflow.yml';
     this.config = null;
+<<<<<<< HEAD
     this.github = process.env.GITHUB_TOKEN ? new GitHubClient(process.env.GITHUB_TOKEN) : null;
     this.githubAuth = new GitHubAuth();
+=======
+    this.github = null; // GitHub integration disabled for now
+>>>>>>> feature/complete-multiflow-v2
   }
 
   async loadConfig() {
@@ -21,7 +28,7 @@ class RepoOrch {
       const content = await fs.readFile(this.configPath, 'utf8');
       this.config = YAML.parse(content);
     } catch (error) {
-      this.config = { repos: {}, features: {} };
+      this.config = { repos: {}, features: {}, profiles: {}, settings: { activeProfile: 'default' } };
     }
   }
 
@@ -346,6 +353,7 @@ class RepoOrch {
   async createFeature(featureName, options = {}) {
     await this.loadConfig();
     const branchName = `feature/${featureName}`;
+<<<<<<< HEAD
     const targetRepos = this.getTargetRepos(options.repos);
     
     // Check if branch already exists
@@ -366,6 +374,11 @@ class RepoOrch {
     
     for (const repoName of targetRepos) {
       const repoInfo = this.config.repos[repoName];
+=======
+    const activeRepos = this.getActiveRepos();
+    
+    for (const [repoName, repoInfo] of Object.entries(activeRepos)) {
+>>>>>>> feature/complete-multiflow-v2
       const git = simpleGit(repoInfo.path);
       
       try {
@@ -397,7 +410,11 @@ class RepoOrch {
     
     this.config.features[featureName] = {
       branch: branchName,
+<<<<<<< HEAD
       repos: results.success,
+=======
+      repos: Object.keys(activeRepos),
+>>>>>>> feature/complete-multiflow-v2
       created: new Date().toISOString()
     };
     
@@ -806,15 +823,22 @@ class RepoOrch {
   async showConfig() {
     await this.loadConfig();
     
+    const activeProfile = this.config.settings?.activeProfile || 'default';
+    const activeRepos = this.getActiveRepos();
+    
     console.log(chalk.bold('\n📄 Workspace Configuration'));
     console.log('========================\n');
     
+    console.log(chalk.bold(`Active Profile: ${chalk.cyan(activeProfile)}`));
+    console.log(`Active Repositories: ${Object.keys(activeRepos).length}/${Object.keys(this.config.repos).length}\n`);
+    
     console.log(chalk.bold('Repositories:'));
     for (const [name, info] of Object.entries(this.config.repos)) {
-      console.log(`├─ ${name}:`);
-      console.log(`│  ├─ Path: ${info.path}`);
-      console.log(`│  ├─ Default Branch: ${chalk.cyan(info.defaultBranch || 'main')}`);
-      console.log(`│  └─ Remote: ${info.hasRemote ? '✅ Yes' : '⚪ No'}`);
+      const isActive = activeRepos[name] ? '✅' : '⚪';
+      console.log(`${isActive} ${name}:`);
+      console.log(`   ├─ Path: ${info.path}`);
+      console.log(`   ├─ Default Branch: ${chalk.cyan(info.defaultBranch || 'main')}`);
+      console.log(`   └─ Remote: ${info.hasRemote ? '✅ Yes' : '⚪ No'}`);
     }
     
     console.log('\n' + chalk.bold('Active Features:'));
@@ -828,6 +852,7 @@ class RepoOrch {
     }
   }
 
+<<<<<<< HEAD
   async setDefaultBranch(repoName, branchName) {
     await this.loadConfig();
     
@@ -871,6 +896,324 @@ class RepoOrch {
     ].join('\n');
     
     await fs.writeFile('.multiflowignore', content);
+=======
+  async checkoutAll(branch) {
+    await this.loadConfig();
+    
+    for (const [repoName, repoInfo] of Object.entries(this.config.repos)) {
+      const git = simpleGit(repoInfo.path);
+      
+      try {
+        await git.checkout(branch);
+        console.log(`✅ ${repoName}: Switched to ${branch}`);
+      } catch (error) {
+        console.log(`⚠️  ${repoName}: ${error.message}`);
+      }
+    }
+  }
+
+  async showDiff(featureName, options = {}) {
+    await this.loadConfig();
+    const feature = this.config.features[featureName];
+    
+    if (!feature) {
+      throw new Error(`Feature '${featureName}' not found`);
+    }
+    
+    console.log(chalk.bold(`\n📈 Cross-Repository Changes Summary`));
+    console.log(`Feature: ${featureName} vs main\n`);
+    
+    for (const repoName of feature.repos) {
+      const repoInfo = this.config.repos[repoName];
+      const defaultBranch = repoInfo.defaultBranch || 'main';
+      
+      try {
+        const changedFiles = await ConflictDetector.getChangedFiles(repoInfo.path, feature.branch, defaultBranch);
+        if (changedFiles.length > 0) {
+          console.log(`📁 ${repoName}: ${changedFiles.length} files changed`);
+          if (!options.summary) {
+            changedFiles.forEach(file => console.log(`   - ${file}`));
+          }
+        } else {
+          console.log(`⚪ ${repoName}: No changes`);
+        }
+      } catch (error) {
+        console.log(`❌ ${repoName}: Error reading diff`);
+      }
+    }
+  }
+
+  async doctor() {
+    await this.loadConfig();
+    
+    console.log(chalk.bold('\n🏥 Workspace Health Check'));
+    console.log('========================\n');
+    
+    let healthyRepos = 0;
+    const activeRepos = this.getActiveRepos();
+    let totalRepos = Object.keys(activeRepos).length;
+    
+    for (const [repoName, repoInfo] of Object.entries(activeRepos)) {
+      const git = simpleGit(repoInfo.path);
+      
+      try {
+        const status = await git.status();
+        const isClean = status.files.length === 0;
+        
+        console.log(`${isClean ? '✅' : '⚠️ '} ${repoName}: ${isClean ? 'Clean working directory' : `${status.files.length} uncommitted changes`}`);
+        
+        if (isClean) healthyRepos++;
+      } catch (error) {
+        console.log(`❌ ${repoName}: Git error - ${error.message}`);
+      }
+    }
+    
+    console.log(`\n📊 Health Score: ${healthyRepos}/${totalRepos} repositories healthy`);
+    
+    if (healthyRepos === totalRepos) {
+      console.log(chalk.green('🎯 Workspace is healthy - ready for development!'));
+    } else {
+      console.log(chalk.yellow('⚠️  Some repositories need attention'));
+    }
+  }
+
+  getActiveRepos() {
+    const activeProfile = this.config.settings?.activeProfile || 'default';
+    const profile = this.config.profiles?.[activeProfile];
+    
+    if (!profile || !profile.repos) {
+      return this.config.repos;
+    }
+    
+    const activeRepos = {};
+    for (const repoName of profile.repos) {
+      if (this.config.repos[repoName]) {
+        activeRepos[repoName] = this.config.repos[repoName];
+      }
+    }
+    return activeRepos;
+  }
+
+  async createProfile(profileName, repoNames = []) {
+    await this.loadConfig();
+    
+    this.config.profiles = this.config.profiles || {};
+    this.config.profiles[profileName] = {
+      repos: repoNames.length > 0 ? repoNames : Object.keys(this.config.repos),
+      created: new Date().toISOString()
+    };
+    
+    await this.saveConfig();
+    console.log(`✅ Profile '${profileName}' created with ${this.config.profiles[profileName].repos.length} repositories`);
+  }
+
+  async switchProfile(profileName) {
+    await this.loadConfig();
+    
+    if (!this.config.profiles?.[profileName]) {
+      throw new Error(`Profile '${profileName}' not found`);
+    }
+    
+    this.config.settings = this.config.settings || {};
+    this.config.settings.activeProfile = profileName;
+    
+    await this.saveConfig();
+    console.log(`✅ Switched to profile '${profileName}'`);
+  }
+
+  async pullAll() {
+    await this.loadConfig();
+    const activeRepos = this.getActiveRepos();
+    
+    for (const [repoName, repoInfo] of Object.entries(activeRepos)) {
+      if (!repoInfo.hasRemote) {
+        console.log(`⚪ ${repoName}: No remote configured`);
+        continue;
+      }
+      
+      const git = simpleGit(repoInfo.path);
+      
+      try {
+        await git.pull();
+        console.log(`✅ ${repoName}: Pulled latest changes`);
+      } catch (error) {
+        console.log(`⚠️  ${repoName}: ${error.message}`);
+      }
+    }
+  }
+
+  async pushAll() {
+    await this.loadConfig();
+    const activeRepos = this.getActiveRepos();
+    
+    for (const [repoName, repoInfo] of Object.entries(activeRepos)) {
+      if (!repoInfo.hasRemote) {
+        console.log(`⚪ ${repoName}: No remote configured`);
+        continue;
+      }
+      
+      const git = simpleGit(repoInfo.path);
+      
+      try {
+        const status = await git.status();
+        if (status.ahead > 0) {
+          await git.push();
+          console.log(`✅ ${repoName}: Pushed ${status.ahead} commits`);
+        } else {
+          console.log(`⚪ ${repoName}: Nothing to push`);
+        }
+      } catch (error) {
+        console.log(`⚠️  ${repoName}: ${error.message}`);
+      }
+    }
+  }
+
+  async createPRs(featureName, title, body = '') {
+    await this.loadConfig();
+    const feature = this.config.features[featureName];
+    
+    if (!feature) {
+      throw new Error(`Feature '${featureName}' not found`);
+    }
+    
+    console.log(chalk.bold(`\n🔀 Creating Pull Requests for '${featureName}'`));
+    console.log('===============================================\n');
+    
+    for (const repoName of feature.repos) {
+      const repoInfo = this.config.repos[repoName];
+      
+      if (!repoInfo.hasRemote) {
+        console.log(`⚪ ${repoName}: No remote configured`);
+        continue;
+      }
+      
+      const defaultBranch = repoInfo.defaultBranch || 'main';
+      const git = simpleGit(repoInfo.path);
+      
+      try {
+        // Check if there are changes
+        const changedFiles = await ConflictDetector.getChangedFiles(repoInfo.path, feature.branch, defaultBranch);
+        if (changedFiles.length === 0) {
+          console.log(`⚪ ${repoName}: No changes to create PR`);
+          continue;
+        }
+        
+        // Get remote URL for PR creation instructions
+        const remotes = await git.getRemotes(true);
+        const originUrl = remotes.find(r => r.name === 'origin')?.refs?.fetch;
+        
+        if (originUrl) {
+          const prUrl = this.generatePRUrl(originUrl, feature.branch, defaultBranch, title, body);
+          console.log(`🔗 ${repoName}: Create PR at:`);
+          console.log(`   ${prUrl}`);
+        } else {
+          console.log(`⚠️  ${repoName}: Could not determine remote URL`);
+        }
+      } catch (error) {
+        console.log(`❌ ${repoName}: Error - ${error.message}`);
+      }
+    }
+  }
+
+  generatePRUrl(remoteUrl, sourceBranch, targetBranch, title, body) {
+    // Convert SSH/HTTPS URLs to web URLs
+    let webUrl = remoteUrl
+      .replace(/^git@github\.com:/, 'https://github.com/')
+      .replace(/\.git$/, '');
+    
+    const params = new URLSearchParams({
+      expand: '1',
+      title: title,
+      body: body
+    });
+    
+    return `${webUrl}/compare/${targetBranch}...${sourceBranch}?${params.toString()}`;
+  }
+
+  async listProfiles() {
+    await this.loadConfig();
+    
+    const profiles = this.config.profiles || {};
+    const activeProfile = this.config.settings?.activeProfile || 'default';
+    
+    console.log(chalk.bold('\n📁 Available Profiles'));
+    console.log('===================\n');
+    
+    if (Object.keys(profiles).length === 0) {
+      console.log('⚪ No profiles created yet');
+      console.log('Create one with: flow profile create <name>');
+      return;
+    }
+    
+    for (const [name, profile] of Object.entries(profiles)) {
+      const isActive = name === activeProfile;
+      const indicator = isActive ? '✅' : '⚪';
+      console.log(`${indicator} ${name} (${profile.repos.length} repos)${isActive ? ' ← active' : ''}`);
+    }
+  }
+
+  async showProfile(profileName) {
+    await this.loadConfig();
+    
+    const profile = this.config.profiles?.[profileName];
+    if (!profile) {
+      throw new Error(`Profile '${profileName}' not found`);
+    }
+    
+    const isActive = profileName === (this.config.settings?.activeProfile || 'default');
+    
+    console.log(chalk.bold(`\n📁 Profile: ${profileName}${isActive ? ' (active)' : ''}`));
+    console.log('========================\n');
+    
+    console.log(chalk.bold('Repositories:'));
+    for (const repoName of profile.repos) {
+      const repoInfo = this.config.repos[repoName];
+      if (repoInfo) {
+        console.log(`✅ ${repoName} (${repoInfo.path})`);
+      } else {
+        console.log(`❌ ${repoName} (not found)`);
+      }
+    }
+    
+    console.log(`\nCreated: ${new Date(profile.created).toLocaleString()}`);
+  }
+
+  async deleteProfile(profileName) {
+    await this.loadConfig();
+    
+    if (!this.config.profiles?.[profileName]) {
+      throw new Error(`Profile '${profileName}' not found`);
+    }
+    
+    const activeProfile = this.config.settings?.activeProfile || 'default';
+    if (profileName === activeProfile) {
+      throw new Error(`Cannot delete active profile '${profileName}'. Switch to another profile first.`);
+    }
+    
+    const profile = this.config.profiles[profileName];
+    console.log(`\nProfile '${profileName}' contains ${profile.repos.length} repositories:`);
+    console.log(`${profile.repos.join(', ')}\n`);
+    
+    const inquirer = require('inquirer');
+    const { confirm } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'confirm',
+        message: `Are you sure you want to delete profile '${profileName}'?`,
+        default: false
+      }
+    ]);
+    
+    if (!confirm) {
+      console.log('⚪ Profile deletion cancelled');
+      return;
+    }
+    
+    delete this.config.profiles[profileName];
+    await this.saveConfig();
+    
+    console.log(`✅ Profile '${profileName}' deleted`);
+>>>>>>> feature/complete-multiflow-v2
   }
 }
 
