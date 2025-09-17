@@ -23,7 +23,7 @@
     "build:corporate": "bash install-corporate.sh"
   },
   "dependencies": {
-    "commander": "^11.0.0",
+    "commander": "^14.0.1",
     "simple-git": "^3.19.1",
     "yaml": "^2.3.2",
     "inquirer": "^9.2.10",
