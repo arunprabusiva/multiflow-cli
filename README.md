@@ -256,73 +256,83 @@ features:
 ## 🔧 Advanced Usage
 
 ### Working with Remotes
-```bash
-# MultiFlow automatically detects and works with:
-# ✅ GitHub repositories
-# ✅ GitLab repositories  
-# ✅ Local-only repositories
-# ✅ Mixed setups (some with remotes, some without)
-```
+MultiFlow automatically detects and works with:
+- ✅ **GitHub repositories**
+- ✅ **GitLab repositories**  
+- ✅ **Local-only repositories**
+- ✅ **Mixed setups** (some with remotes, some without)
 
 ### Multiple Features
+**Work on multiple features simultaneously:**
 ```bash
-# Work on multiple features simultaneously
 flow feature create user-auth
 flow feature create payment-system
 flow feature create admin-panel
+```
 
-# Each feature is isolated per repository
-flow status user-auth     # Shows user-auth branches
+**Each feature is isolated per repository:**
+```bash
+flow status user-auth      # Shows user-auth branches
 flow status payment-system # Shows payment-system branches
 ```
 
 ### Profile-Based Development
+**Create profiles for different development workflows:**
 ```bash
-# Create profiles for different development workflows
 flow profile create frontend-only --repos frontend shared-components
 flow profile create backend-only --repos backend database
 flow profile create fullstack --repos frontend backend mobile
+```
 
-# Switch between profiles
+**Switch between profiles:**
+```bash
 flow profile switch frontend-only
-# Now all commands only affect: frontend, shared-components
-
 flow feature create user-login
-# Only creates branches in frontend & shared-components!
+```
+Now all commands only affect: `frontend`, `shared-components`
 
-# List profiles with active indicator
+**List profiles with active indicator:**
+```bash
 flow profile list
-# Output:
-# ✅ frontend-only (2 repos) ← active
-# ⚪ backend-only (2 repos)
-# ⚪ fullstack (3 repos)
+```
+**Output:**
+```
+✅ frontend-only (2 repos) ← active
+⚪ backend-only (2 repos)
+⚪ fullstack (3 repos)
 ```
 
 ### Git Operations
+**Pull/Push across all active repositories:**
 ```bash
-# Pull/Push across all active repositories
 flow pull    # Pull latest changes
 flow push    # Push local changes
+```
 
-# Create pull requests with generated URLs
+**Create pull requests with generated URLs:**
+```bash
 flow pr payment-system --title "Add Stripe integration"
-# Output:
-# 🔗 frontend: Create PR at: https://github.com/user/frontend/compare/main...feature/payment-system
-# 🔗 backend: Create PR at: https://github.com/user/backend/compare/main...feature/payment-system
+```
+**Output:**
+```
+🔗 frontend: Create PR at: https://github.com/user/frontend/compare/main...feature/payment-system
+🔗 backend: Create PR at: https://github.com/user/backend/compare/main...feature/payment-system
 ```
 
 ### Conflict Detection
-```bash
-# Before creating PRs, MultiFlow checks:
-# ✅ Merge conflicts with main/master
-# ✅ Files changed per repository
-# ✅ Repositories with no changes
+Before creating PRs, MultiFlow automatically checks:
+- ✅ **Merge conflicts** with main/master
+- ✅ **Files changed** per repository
+- ✅ **Repositories with no changes**
 
+```bash
 flow feature merge my-feature
-# Output:
-# ✅ frontend: Ready for PR (3 files changed)
-# ⚠️  backend: Merge conflicts detected  
-# ⚪ database: No changes to merge
+```
+**Output:**
+```
+✅ frontend: Ready for PR (3 files changed)
+⚠️  backend: Merge conflicts detected  
+⚪ database: No changes to merge
 ```
 
 ## 🛠️ Requirements
