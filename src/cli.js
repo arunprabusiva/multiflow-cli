@@ -10,14 +10,14 @@ const repoOrch = new RepoOrch();
 program
   .name('mflow')
   .description('Coordinate Git operations across multiple repositories')
-  .version('2.0.7');
+  .version('2.0.8');
 
 program
   .command('about')
   .description('Show information about MultiFlow')
   .action(() => {
     console.log(chalk.cyan('🌊 MultiFlow - Multi-Repo Workflow CLI'));
-    console.log(chalk.gray('Version: 2.0.7'));
+    console.log(chalk.gray('Version: 2.0.8'));
     console.log(chalk.gray('Created by: Arunprabu Sivapprakasam'));
     console.log(chalk.gray('GitHub: https://github.com/arunprabusiva/multiflow-cli'));
     console.log(chalk.gray('LinkedIn: https://linkedin.com/in/arunprabusiva'));
